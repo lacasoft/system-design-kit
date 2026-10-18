@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.DS_Store
+.idea/
+# lo que el kit genera al probarse dentro de su propio repo
+/design.md
+/CLAUDE.md
+/.claude/
+.claude.backup.*
+*.kit-new
