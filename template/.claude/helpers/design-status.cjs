@@ -219,9 +219,13 @@ function readStdin() {
 }
 
 const T = {
-  es: { none: "No hay design.md.", next: "Siguiente", review: "Listo para revisión", diagram: "Sin diagrama todavía" },
-  en: { none: "No design.md yet.", next: "Next", review: "Ready for review", diagram: "No diagram yet" },
+  es: { none: "No hay design.md.", next: "Siguiente", review: "Listo para revisión", diagram: "Sin diagrama todavía", complete: "Diseño completo" },
+  en: { none: "No design.md yet.", next: "Next", review: "Ready for review", diagram: "No diagram yet", complete: "Design complete" },
 };
+// Cuando no queda ninguna sección pendiente (salvo el registro de revisiones), el diseño puede
+// pasar al proyecto de código: dev-starter-kit (≥ 3.1) lo importa con /project-context.
+const handoff = () =>
+  `en el proyecto de código (con dev-starter-kit): claude --add-dir ${ROOT} y ahí /project-context ${DESIGN}`;
 
 function main() {
   const action = process.argv[2] || "report";
@@ -292,6 +296,7 @@ function main() {
       if (!st.hasDiagram) lines.push(`${t.diagram}: /design-diagram architecture`);
       lines.push(`${t.review}: en otra terminal, claude --permission-mode plan, y ahí /design-review <foco>.`);
     }
+    if (!st.next) lines.push(`${t.complete}. Para llevarlo al código: ${handoff()}`);
     console.log(lines.join("\n"));
     return;
   }
@@ -306,6 +311,7 @@ function main() {
   if (st.errors.length) console.log(`\n⚠️ Estructura: ${st.errors.join("; ")}`);
   if (st.next) console.log(`\n${T[st.language].next}: ${st.next.label} (/design ${st.next.id})`);
   if (st.readyForReview) console.log(`${T[st.language].review}: claude --permission-mode plan → /design-review <foco>`);
+  if (!st.next) console.log(`${T[st.language].complete}. Para llevarlo al código: ${handoff()}`);
 }
 
 if (require.main === module) main();

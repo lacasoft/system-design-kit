@@ -161,7 +161,8 @@ function composeClaudeMd() {
   }
 }
 
-const GITIGNORE = [".claude/agent-memory-local/", "CLAUDE.local.md", ".claude.backup.*", "*.kit-new"];
+// .archify/ guarda borradores y recibos de archify (opcional); los HTML finales van a diagrams/.
+const GITIGNORE = [".claude/agent-memory-local/", "CLAUDE.local.md", ".claude.backup.*", "*.kit-new", ".archify/"];
 function ensureGitignore() {
   const gi = path.join(CWD, ".gitignore");
   const cur = fs.existsSync(gi) ? fs.readFileSync(gi, "utf8") : "";

@@ -25,6 +25,7 @@ test("instala la capa, CLAUDE.md y design.md en español por defecto", () => {
   assert.match(leer(dir, "design.md"), /^language: es$/m);
   assert.match(leer(dir, "design.md"), /^# Acortador de URLs — System Design$/m);
   assert.match(leer(dir, ".gitignore"), /CLAUDE\.local\.md/);
+  assert.match(leer(dir, ".gitignore"), /^\.archify\/$/m, "borradores y recibos de archify fuera del repo");
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

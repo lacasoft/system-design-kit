@@ -67,6 +67,8 @@ flowchart LR
    pides una revisión acotada: hasta tres escenarios de falla, cada uno con la mitigación más
    pequeña y su costo.
 5. **Iteras.** Lo que aceptas vuelve al documento; lo que cambia se tacha, no se borra.
+6. **Pasas al código.** Con el diseño completo, el proyecto de código lo importa: requisitos,
+   arquitectura y fallas a su `CLAUDE.project.md`, y un ADR por cada decisión.
 
 ---
 
@@ -76,14 +78,14 @@ flowchart LR
 
 ```bash
 mkdir acortador-urls && cd acortador-urls
-npx -y github:lacasoft/system-design-kit#v1.0.0
+npx -y github:lacasoft/system-design-kit#v1.1.0
 ```
 
 El instalador pregunta el idioma del documento (español o inglés) y qué vas a diseñar. Para
 instalar sin preguntas:
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.0.0 --lang en --title "URL shortener" --yes
+npx -y github:lacasoft/system-design-kit#v1.1.0 --lang en --title "URL shortener" --yes
 ```
 
 Después:
@@ -177,6 +179,7 @@ El kit incluye 4 skills de Claude Code:
 | `/design [sección]` | Entrevista guiada; retoma donde te quedaste o va a la sección que indiques | Sí, con tus respuestas |
 | `/estimate [qué]` | Estimaciones de capacidad con fórmulas, supuestos y sus implicaciones | Solo si lo aceptas |
 | `/design-diagram [architecture \| sequence <flujo> \| data-model \| check]` | Diagramas Mermaid desde el texto, y verificación diagrama ↔ texto | Sí, entre sus marcas |
+| `/design-diagram html <diagrama>` | HTML interactivo para presentar, con la skill opcional archify | No; escribe en `diagrams/` |
 | `/design-review <foco> [N] [lente]` | Revisión acotada: N escenarios (3 por defecto) con mitigación mínima y tradeoff | No; registra solo si se lo pides |
 
 Lentes de revisión: `fallas`, `escala`, `consistencia`, `seguridad`, `costo` y `operacion`.
@@ -248,12 +251,65 @@ tu-carpeta/
 - **VS Code**: vista previa de Markdown con la extensión
   [Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid).
 
+### Diagramas interactivos con archify (opcional)
+
+Para presentar o compartir, [archify](https://github.com/tt-a1i/archify) convierte el Mermaid de
+`design.md` en un HTML interactivo: tema claro/oscuro, leyenda, zoom y exportación a imagen.
+
+```text
+> /design-diagram html architecture      → diagrams/architecture.html
+```
+
+Mermaid sigue siendo la fuente de verdad (se versiona y se revisa en el PR); el HTML es un derivado
+que se regenera cuando cambia el diseño.
+
+**Lo revisamos antes de recomendarlo** (v3.2.0): licencia Apache-2.0, gratuito, sin cuenta ni API
+key; corre en local y solo necesita Chrome para su verificación en navegador. Lo probamos con un
+`design.md` de este kit: conservó la topología, no modificó el documento y pasó sus cuatro
+verificaciones. Su única conexión de red es una consulta de actualizaciones a GitHub Pages, que se
+apaga con `ARCHIFY_UPDATE_CHECK_DISABLED=1`.
+
+Instálalo **en la carpeta del diseño** (no en global) y con versión fija:
+
+```bash
+DISABLE_TELEMETRY=1 npx -y skills@1.7.2 add https://github.com/tt-a1i/archify/tree/v3.2.0/archify -a claude-code --copy -y
+```
+
+Queda en `.claude/skills/archify/` (unos 18 MB) con su versión en `skills-lock.json`; tu
+`~/.claude` no se toca. Evita `-g`: instalaría la skill en todos tus proyectos, y su descripción
+es tan amplia que Claude la consideraría en cualquier conversación sobre diagramas.
+
+---
+
+## Del diseño al código
+
+Cuando el diseño está completo, el aviso de inicio de sesión te da el comando exacto. En el
+proyecto de código, con [dev-starter-kit](https://github.com/lacasoft/dev-starter-kit) 3.1 o
+superior:
+
+```bash
+claude --add-dir ../acortador-urls
+> /project-context ../acortador-urls/design.md
+```
+
+| Del diseño | Al proyecto |
+|---|---|
+| Requisitos y fuera de alcance | *Visión del producto* |
+| Requisitos no funcionales y escala | *Atributos de calidad* con sus umbrales |
+| API y modelo de datos | *Modelo / dominio* y contratos |
+| Arquitectura y escenarios de falla | *Arquitectura* (con "fallas previstas") y tests de regresión |
+| Decisiones clave y tradeoffs | **Un ADR por decisión** en `docs/adr/` |
+| Supuestos sin confirmar | *Pendiente de confirmar* |
+
+Nadie reescribe requisitos ni decisiones, y si el diseño cambia, volver a correrlo actualiza solo
+lo que vino de aquí.
+
 ---
 
 ## Actualizar
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.0.0 --update --yes
+npx -y github:lacasoft/system-design-kit#v1.1.0 --update --yes
 ```
 
 Actualiza las reglas y skills que no hayas modificado. Lo que editaste se conserva y la versión
@@ -297,7 +353,7 @@ test/                               # tests del helper y del instalador
 ```
 
 Versionado [SemVer](https://semver.org/) con un tag por versión; los cambios están en el
-[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.0.0`): es reproducible y evita la
+[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.1.0`): es reproducible y evita la
 caché de `npx`.
 
 ---
