@@ -97,3 +97,13 @@ test("guard: calla si la estructura está bien o si el archivo editado es otro",
 
 test("statusline muestra el avance", () =>
   assert.match(correr("statusline", rellenar(render({ title: "X" }), ["requirements"])).out, /📐 1\/7 · siguiente: Fuera de alcance/));
+
+test("hook: con el diseño completo da el comando para llevarlo al código", () => {
+  const todas = ["requirements", "out-of-scope", "scale", "api-data-model", "architecture", "decisions", "failures"];
+  const out = correr("hook", rellenar(render({ title: "X" }), todas)).out;
+  assert.match(out, /Diseño completo/);
+  assert.match(out, /\/project-context \S+design\.md/);
+  assert.match(out, /claude --add-dir /);
+});
+test("hook: sin el diseño completo no ofrece el traspaso", () =>
+  assert.doesNotMatch(correr("hook", rellenar(render({ title: "X" }), ["requirements"])).out, /project-context/));

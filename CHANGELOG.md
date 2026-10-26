@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ## [No publicado]
 
+## [1.1.0] - 2026-10-26
+
+### Added
+- **Del diseño al código.** Cuando no queda ninguna sección pendiente, el aviso de inicio de sesión (y `design-status.cjs`) da el comando exacto para importar el diseño en el proyecto de código: `claude --add-dir <carpeta>` y `/project-context <ruta>/design.md` con dev-starter-kit ≥ 3.1, que lo traslada a `CLAUDE.project.md` y crea un ADR por decisión.
+- **`/design-diagram html <diagrama>`**: HTML interactivo para presentar, generado por la skill opcional [archify](https://github.com/tt-a1i/archify) a partir del Mermaid de `design.md`, que sigue siendo la fuente de verdad. archify se revisó y se probó con este kit (v3.2.0: Apache-2.0, gratuito, sin cuenta ni API key, local salvo una consulta de actualizaciones que se puede apagar); el README da el comando de instalación por proyecto, con versión fija y sin telemetría. El instalador ignora `.archify/`, donde archify deja sus borradores y recibos.
+
 ## [1.0.0] - 2026-10-18
 
 Primera versión: taller de System Design para Claude Code.

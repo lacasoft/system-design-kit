@@ -23,6 +23,8 @@ Este workspace sirve para **diseñar un sistema antes de construirlo**. No se es
 | Calcular capacidad | `/estimate` | Estimaciones con la aritmética a la vista |
 | Dibujar | `/design-diagram [architecture \| sequence <flujo> \| data-model \| check]` | Diagramas Mermaid derivados del texto, dentro de `design.md` |
 | Revisar | `claude --permission-mode plan` y luego `/design-review <foco>` | Lee y critica sin editar; los cambios se aplican solo si la persona aprueba el plan |
+| Presentar | `/design-diagram html <diagrama>` (requiere la skill opcional `archify`) | HTML interactivo en `diagrams/` a partir del Mermaid de `design.md` |
+| Pasar al código | En el proyecto de código con dev-starter-kit: `/project-context <ruta>/design.md` | Traslada el diseño a `CLAUDE.project.md` y crea un ADR por decisión |
 
 **Plan mode** (`claude --permission-mode plan`, o Shift+Tab dentro de una sesión) es el modo para revisar: Claude solo lee y propone. Úsalo cuando ya estén **requisitos, escala y arquitectura inicial**; sin ellos, una revisión es especulación.
 
