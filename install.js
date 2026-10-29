@@ -282,6 +282,8 @@ async function main() {
    • Abre pi en esta carpeta y acepta la confianza del proyecto: sin ella Pi no carga .pi/
      (ni las skills ni la expansión de CLAUDE.md). Con la capa activa verás "📐 design-kit" abajo.
    • Las skills se invocan como /skill:design, /skill:estimate, /skill:design-diagram…
+   • Para revisar, en otra terminal: pi --review (solo herramientas de lectura) y ahí
+     /skill:design-review <foco>.
    • Pi envía telemetría anónima de instalación por defecto: PI_TELEMETRY=0 la apaga.
    • Instala ripgrep y fd con el gestor de paquetes de tu sistema: si faltan, Pi descarga
      la última versión de GitHub sin fijarla.`);
