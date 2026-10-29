@@ -4,17 +4,32 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ## [No publicado]
 
+## [1.2.0] - 2026-10-29
+
+Soporte opcional para [Pi Agent](https://github.com/earendil-works/pi) ≥ 1.4.0. Para Claude Code no cambia nada.
+
+### Notas de actualización
+- `npx -y github:lacasoft/system-design-kit#v1.2.0 --update --yes` trae los cambios de las skills y de `design-status.cjs`. Para sumar Pi, agrega `--pi`; desde ese momento `--update` la recuerda.
+
 ### Added
+- **Revisión sin escrituras en Pi (`pi --review`)**: deja solo `read`, `grep`, `find`, `ls` y `design_status`, bloquea cualquier otra herramienta (también MCP, codemode o la de otra extensión) y le dice al modelo que la revisión es la respuesta. Sin la extensión, Pi rechaza la opción y no arranca.
+- **Estado del diseño en Pi**: al iniciar, recargar o compactar la sesión, el mismo estado que da el hook de inicio de Claude entra al contexto de Pi. La herramienta de solo lectura `design_status` muestra el informe, para el modo revisión, donde no hay bash.
+- **Guard de `design.md` en Pi**: tras cada `write`/`edit` de `design.md`, y tras cualquier `bash` que lo modifique, la extensión revisa las marcas de sección y avisa al modelo si se perdió alguna. En las pruebas con Sonnet, el modelo escribió `design.md` con un script en 2 de 3 repeticiones.
+- `design-status.cjs` exporta `hookMessage`, `report`, `guardReason` y `load` para la extensión. Dentro de Pi (`PI_CODING_AGENT=true`), sus sugerencias usan `/skill:<nombre>` y `pi --review`.
+- README: sección *También con Pi Agent* con requisitos, equivalencias, confianza del proyecto, privacidad y los modelos probados.
+
+### Changed
+- Las reglas y `design-review` ya no asumen plan mode: nombran también `pi --review` y la herramienta `design_status`.
+- Las skills nombran el documento como `./design.md` y aclaran que sus rutas son relativas a la raíz del proyecto. Pi le dice al modelo que las referencias de una skill son relativas a la carpeta de la skill, y un modelo más pequeño (qwen3 8B) buscaba `design.md` en `.claude/skills/design/`.
+
+### Base para Pi Agent (incluida en esta versión)
 - **Base para Pi Agent (`--pi`)**: primera parte del soporte para [Pi Agent](https://github.com/earendil-works/pi) ≥ 1.4.0. Es una capa aditiva: sin `--pi` el instalador hace exactamente lo de antes. Con `--pi`:
   - `.pi/settings.json` carga las skills desde `.claude/skills`, sin copias. Si el archivo ya existe se fusiona, y si no es JSON válido no se toca.
   - `.pi/extensions/system-design-kit.ts` expande los `@imports` de `CLAUDE.md`, que Pi lee pero no resuelve. Sin esto, el modelo vería la línea `@design.md` en lugar del documento. La expansión la hace `.claude/helpers/claude-imports.cjs` con las reglas de Claude Code (rutas relativas al archivo, hasta 5 saltos, sin ciclos, fuera del código) y nunca incluye archivos de entorno reales ni nada de `~/.ssh` o `~/.aws`.
   - La barra de estado de Pi muestra `📐 design-kit` cuando la capa está activa.
   - El manifiesto registra la capa, así que `--update` la recuerda.
   - Al terminar, el instalador explica la confianza del proyecto, `PI_TELEMETRY=0` y por qué conviene instalar ripgrep y fd.
-- CI: job que prueba la capa dentro de Pi 1.4.0 real con su proveedor simulado, sin modelo ni API key.
-
-### Changed
-- Las skills nombran el documento como `./design.md` y aclaran que sus rutas son relativas a la raíz del proyecto. Pi le dice al modelo que las referencias de una skill son relativas a la carpeta de la skill, y un modelo más pequeño (qwen3 8B) buscaba `design.md` en `.claude/skills/design/`.
+- CI: job que prueba la capa dentro de Pi 1.4.0 real con su proveedor simulado, sin modelo ni API key: imports, estado, modo revisión (hash del proyecto intacto) y guard.
 
 ## [1.1.0] - 2026-10-26
 
