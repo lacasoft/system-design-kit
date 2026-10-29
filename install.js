@@ -7,11 +7,14 @@
  *  2. Compone ./CLAUDE.md con un bloque gestionado que importa las reglas del kit.
  *  3. Crea design.md (en español o inglés) si no existe. Nunca lo toca si ya existe.
  *  4. Actualiza .gitignore con lo personal y los backups.
+ *  5. Con --pi, añade la capa para Pi Agent (template/.pi → .pi) y asegura que .pi/settings.json
+ *     cargue las skills de .claude/.
  *
  * Flags:
  *   --lang es|en     idioma del documento (si no, pregunta; con --yes, es)
  *   --title "…"      qué vas a diseñar (si no, pregunta; con --yes, el nombre de la carpeta)
  *   --yes, -y        no interactivo
+ *   --pi             añade la capa para Pi Agent; --update la recuerda (manifiesto)
  *   --update         trae la última capa del kit sin pisar lo que hayas editado (manifiesto)
  *   --dry-run        simula sin escribir
  *   --help, -h       ayuda
@@ -32,6 +35,7 @@ const value = (name) => {
 };
 const FLAGS = {
   yes: flag("--yes", "-y"),
+  pi: flag("--pi"),
   update: flag("--update"),
   dryRun: flag("--dry-run"),
   help: flag("--help", "-h"),
@@ -50,6 +54,8 @@ Uso:  npx -y github:lacasoft/system-design-kit [opciones]   (dentro de la carpet
   --lang es|en     idioma de design.md (pregunta si no lo indicas; con --yes, es)
   --title "…"      qué vas a diseñar (pregunta si no lo indicas; con --yes, el nombre de la carpeta)
   --yes, -y        no interactivo
+  --pi             añade la capa para Pi Agent (.pi/): usa las mismas skills y expande los
+                   imports de CLAUDE.md. --update la recuerda.
   --update         actualiza las reglas y skills del kit sin pisar lo que hayas editado.
                    design.md nunca se toca.
   --dry-run        simula sin escribir
@@ -108,11 +114,12 @@ function walk(dir, base = dir, out = []) {
   }
   return out;
 }
-function applyLayer(ctx) {
-  const src = path.join(TEMPLATE, ".claude");
+// `layer` es la carpeta que se copia de template/ al proyecto: .claude, o .pi con --pi.
+function applyLayer(ctx, layer) {
+  const src = path.join(TEMPLATE, layer);
   for (const rel of walk(src)) {
     const buf = fs.readFileSync(path.join(src, rel));
-    const dest = path.join(CWD, ".claude", rel);
+    const dest = path.join(CWD, layer, rel);
     const shown = path.relative(CWD, dest);
     ctx.next[rel] = hash(buf);
     if (!fs.existsSync(dest)) {
@@ -161,13 +168,34 @@ function composeClaudeMd() {
   }
 }
 
+// ---------- .pi/settings.json ----------
+// Es de la persona (tema, modelo, paquetes…): el kit solo se asegura de que Pi cargue las skills
+// de .claude/, sin copiarlas. Las rutas de ese archivo son relativas a .pi/.
+const PI_SKILLS = "../.claude/skills";
+function mergePiSettings() {
+  const p = path.join(CWD, ".pi", "settings.json");
+  const exists = fs.existsSync(p);
+  const cur = exists ? readJSON(p) : {};
+  if (!cur || typeof cur !== "object" || Array.isArray(cur) || (cur.skills !== undefined && !Array.isArray(cur.skills))) {
+    console.log(`  ⚠️  .pi/settings.json no tiene el formato esperado: no se toca. Agrega a mano "skills": ["${PI_SKILLS}"].`);
+    return;
+  }
+  const skills = cur.skills || [];
+  if (skills.includes(PI_SKILLS)) return;
+  if (!FLAGS.dryRun) {
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, JSON.stringify({ ...cur, skills: [...skills, PI_SKILLS] }, null, 2) + "\n");
+  }
+  console.log(`  ${dry}${exists ? "🔁" : "➕"} .pi/settings.json (skills de .claude/)`);
+}
+
 // .archify/ guarda borradores y recibos de archify (opcional); los HTML finales van a diagrams/.
 const GITIGNORE = [".claude/agent-memory-local/", "CLAUDE.local.md", ".claude.backup.*", "*.kit-new", ".archify/"];
-function ensureGitignore() {
+function ensureGitignore(withPi) {
   const gi = path.join(CWD, ".gitignore");
   const cur = fs.existsSync(gi) ? fs.readFileSync(gi, "utf8") : "";
   const have = new Set(cur.split(/\r?\n/).map((l) => l.trim()));
-  const add = GITIGNORE.filter((l) => !have.has(l));
+  const add = [...GITIGNORE, ...(withPi ? [".pi.backup.*"] : [])].filter((l) => !have.has(l));
   if (!add.length) return;
   if (!FLAGS.dryRun) fs.writeFileSync(gi, `${cur}${cur && !cur.endsWith("\n") ? "\n" : ""}${cur ? "\n" : ""}# system-design-kit\n${add.join("\n")}\n`);
   console.log(`  ${dry}➕ .gitignore += ${add.join("  ")}`);
@@ -194,27 +222,41 @@ async function main() {
     if (!title) title = ((await ask(`¿Qué vas a diseñar? (título corto) [${path.basename(CWD)}]: `)) || "").trim() || path.basename(CWD);
   }
 
-  if (fs.existsSync(path.join(CWD, ".claude")) && !FLAGS.dryRun) {
-    const bk = `.claude.backup.${Date.now()}`;
-    fs.cpSync(path.join(CWD, ".claude"), path.join(CWD, bk), { recursive: true });
-    console.log(`  📦 Backup: ${bk}`);
+  const prev = readJSON(MANIFEST);
+  const withPi = FLAGS.pi || Boolean(prev && prev.pi);
+
+  const stamp = Date.now();
+  for (const dir of withPi ? [".claude", ".pi"] : [".claude"]) {
+    if (fs.existsSync(path.join(CWD, dir)) && !FLAGS.dryRun) {
+      const bk = `${dir}.backup.${stamp}`;
+      fs.cpSync(path.join(CWD, dir), path.join(CWD, bk), { recursive: true });
+      console.log(`  📦 Backup: ${bk}`);
+    }
   }
 
   console.log("\n📄 Capa del kit (.claude/)...");
-  const prev = readJSON(MANIFEST);
-  const ctx = { prev: (prev && prev.files) || {}, next: {}, added: 0, updated: 0, same: 0, kept: 0, conflicts: 0 };
-  applyLayer(ctx);
+  const counters = () => ({ next: {}, added: 0, updated: 0, same: 0, kept: 0, conflicts: 0 });
+  const ctx = { ...counters(), prev: (prev && prev.files) || {} };
+  applyLayer(ctx, ".claude");
+  const ctxPi = { ...counters(), prev: (prev && prev.pi && prev.pi.files) || {} };
+  if (withPi) {
+    console.log("\n🧩 Capa de Pi Agent (.pi/)...");
+    applyLayer(ctxPi, ".pi");
+    mergePiSettings();
+  }
+  const sum = (k) => ctx[k] + ctxPi[k];
   const resumen = [
-    ctx.added && `${ctx.added} nuevos`,
-    ctx.updated && `${ctx.updated} actualizados`,
-    ctx.same && `${ctx.same} ya al día`,
-    ctx.kept && `${ctx.kept} conservados (usa --update para actualizarlos)`,
-    ctx.conflicts && `${ctx.conflicts} con cambios tuyos (revisa los *.kit-new)`,
+    sum("added") && `${sum("added")} nuevos`,
+    sum("updated") && `${sum("updated")} actualizados`,
+    sum("same") && `${sum("same")} ya al día`,
+    sum("kept") && `${sum("kept")} conservados (usa --update para actualizarlos)`,
+    sum("conflicts") && `${sum("conflicts")} con cambios tuyos (revisa los *.kit-new)`,
   ].filter(Boolean);
   if (resumen.length) console.log(`  📋 ${resumen.join(" · ")}`);
   if (!FLAGS.dryRun) {
     fs.mkdirSync(path.dirname(MANIFEST), { recursive: true });
-    fs.writeFileSync(MANIFEST, JSON.stringify({ version: VERSION, files: ctx.next }, null, 2) + "\n");
+    const manifest = { version: VERSION, files: ctx.next, ...(withPi ? { pi: { files: ctxPi.next } } : {}) };
+    fs.writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
   }
 
   console.log("\n📝 CLAUDE.md, design.md y .gitignore...");
@@ -223,7 +265,7 @@ async function main() {
     if (!FLAGS.dryRun) fs.writeFileSync(designPath, status.render({ title, language: lang }));
     console.log(`  ${dry}➕ design.md (${lang}): "${title}"`);
   }
-  ensureGitignore();
+  ensureGitignore(withPi);
 
   const es = (existing ? existing.language : lang) !== "en";
   console.log(`
@@ -234,6 +276,16 @@ async function main() {
    3. Para revisar, en la terminal integrada: claude --permission-mode plan
       y ahí /design-review <foco>  (p. ej. ${es ? '"el flujo asíncrono"' : '"the async processing flow"'}).
    Vista previa de los diagramas en VS Code: extensión bierner.markdown-mermaid (GitHub los renderiza solo).`);
+  if (withPi) {
+    console.log(`
+🧩 Pi Agent (capa .pi/):
+   • Abre pi en esta carpeta y acepta la confianza del proyecto: sin ella Pi no carga .pi/
+     (ni las skills ni la expansión de CLAUDE.md). Con la capa activa verás "📐 design-kit" abajo.
+   • Las skills se invocan como /skill:design, /skill:estimate, /skill:design-diagram…
+   • Pi envía telemetría anónima de instalación por defecto: PI_TELEMETRY=0 la apaga.
+   • Instala ripgrep y fd con el gestor de paquetes de tu sistema: si faltan, Pi descarga
+     la última versión de GitHub sin fijarla.`);
+  }
 }
 
 main().catch((e) => {
