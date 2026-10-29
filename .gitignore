@@ -6,5 +6,7 @@ node_modules/
 /design.md
 /CLAUDE.md
 /.claude/
+/.pi/
 .claude.backup.*
+.pi.backup.*
 *.kit-new
