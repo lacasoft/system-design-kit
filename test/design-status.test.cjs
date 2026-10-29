@@ -13,13 +13,15 @@ function rellenar(txt, ids) {
   for (const id of ids) txt = txt.replace(new RegExp(`(<!-- section:${id} -->\\n<!--.*-->\\n)_⏳ (Pendiente|Pending)_`), `$1- contenido de ${id}`);
   return txt;
 }
-function correr(action, design, input = {}) {
+// `env` permite simular que el helper corre dentro de Pi (PI_CODING_AGENT=true); por defecto, Claude.
+function correr(action, design, input = {}, env = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "design-"));
   if (design !== null) fs.writeFileSync(path.join(dir, "design.md"), design);
+  const { PI_CODING_AGENT, ...base } = process.env;
   const r = spawnSync("node", [HELPER, action], {
     input: JSON.stringify(typeof input === "function" ? input(dir) : input),
     encoding: "utf8",
-    env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
+    env: { ...base, CLAUDE_PROJECT_DIR: dir, ...env },
   });
   fs.rmSync(dir, { recursive: true, force: true });
   return { code: r.status, out: r.stdout || "" };
@@ -107,3 +109,18 @@ test("hook: con el diseño completo da el comando para llevarlo al código", () 
 });
 test("hook: sin el diseño completo no ofrece el traspaso", () =>
   assert.doesNotMatch(correr("hook", rellenar(render({ title: "X" }), ["requirements"])).out, /project-context/));
+
+// ---- dentro de Pi Agent: mismas sugerencias, con su sintaxis ----
+const enPi = { PI_CODING_AGENT: "true" };
+test("en Pi, el hook propone /skill:design y la revisión con pi --review", () => {
+  assert.match(correr("hook", null, {}, enPi).out, /\/skill:design/);
+  const out = correr("hook", rellenar(render({ title: "X" }), ["requirements", "scale", "architecture"]), {}, enPi).out;
+  assert.match(out, /→ \/skill:design out-of-scope/);
+  assert.match(out, /pi --review, y ahí \/skill:design-review <foco>/);
+  assert.doesNotMatch(out, /permission-mode/);
+});
+test("en Pi, el informe usa la misma sintaxis", () => {
+  const out = correr("report", rellenar(render({ title: "X" }), ["requirements", "scale", "architecture"]), {}, enPi).out;
+  assert.match(out, /\(\/skill:design out-of-scope\)/);
+  assert.match(out, /pi --review → \/skill:design-review/);
+});

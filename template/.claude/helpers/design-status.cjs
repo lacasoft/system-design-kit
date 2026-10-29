@@ -2,7 +2,8 @@
 /**
  * design-status.cjs — estado y estructura de design.md (zero-dep).
  *
- * Lo usan el instalador, los hooks de Claude Code y las skills:
+ * Lo usan el instalador, los hooks de Claude Code, la extensión de Pi Agent (como módulo) y las skills.
+ * Dentro de Pi (PI_CODING_AGENT=true), las sugerencias usan /skill:<nombre> y `pi --review`.
  *   node design-status.cjs                 informe legible: qué secciones están hechas y cuál sigue
  *   node design-status.cjs hook            SessionStart: el mismo estado, como contexto breve
  *   node design-status.cjs guard           PostToolUse: si una edición rompió la estructura, se lo dice a Claude
@@ -227,6 +228,53 @@ const T = {
 const handoff = () =>
   `en el proyecto de código (con dev-starter-kit): claude --add-dir ${ROOT} y ahí /project-context ${DESIGN}`;
 
+// Las sugerencias usan la sintaxis del agente: en Pi las skills son /skill:<nombre> y el modo de
+// solo lectura es `pi --review`. Pi marca a sus procesos hijos con PI_CODING_AGENT=true.
+const enPi = () => process.env.PI_CODING_AGENT === "true";
+function syntax(pi = enPi()) {
+  return {
+    skill: (name) => (pi ? `/skill:${name}` : `/${name}`),
+    review: pi ? "pi --review" : "claude --permission-mode plan",
+  };
+}
+
+/** Estado breve para el inicio de sesión (hook SessionStart en Claude; contexto en Pi). */
+function hookMessage(st, { pi } = {}) {
+  const x = syntax(pi);
+  if (!st) return `📐 ${T.es.none} Propón empezar con ${x.skill("design")} (o: node .claude/helpers/design-status.cjs init --title "…" --lang es|en).`;
+  const t = T[st.language];
+  const hechas = st.sections.filter((s) => s.done && s.id !== "ai-review");
+  const lines = [`📐 design.md (${st.language}) — ${hechas.length}/${SECTIONS.length - 1}: ${hechas.map((s) => s.label).join(", ") || "—"}.`];
+  if (st.errors.length) lines.push(`⚠️ Estructura: ${st.errors.join("; ")}.`);
+  if (st.next) lines.push(`${t.next}: ${st.next.label} → ${x.skill("design")} ${st.next.id}`);
+  if (st.readyForReview) {
+    if (!st.hasDiagram) lines.push(`${t.diagram}: ${x.skill("design-diagram")} architecture`);
+    lines.push(`${t.review}: en otra terminal, ${x.review}, y ahí ${x.skill("design-review")} <foco>.`);
+  }
+  if (!st.next) lines.push(`${t.complete}. Para llevarlo al código: ${handoff()}`);
+  return lines.join("\n");
+}
+
+/** Informe legible: qué secciones están hechas y cuál sigue. */
+function report(st, { pi } = {}) {
+  const x = syntax(pi);
+  if (!st) return `${T.es.none} Créalo con: node .claude/helpers/design-status.cjs init --title "…" --lang es|en`;
+  const lines = [`📐 ${st.title || "design.md"} (${st.language})`];
+  for (const s of st.sections) lines.push(`  ${s.done ? "✅" : "⏳"} ${s.label}${s.diagrams && s.diagrams.length ? `  [diagramas: ${s.diagrams.join(", ")}]` : ""}`);
+  if (st.errors.length) lines.push(`\n⚠️ Estructura: ${st.errors.join("; ")}`);
+  if (st.next) lines.push(`\n${T[st.language].next}: ${st.next.label} (${x.skill("design")} ${st.next.id})`);
+  if (st.readyForReview) lines.push(`${T[st.language].review}: ${x.review} → ${x.skill("design-review")} <foco>`);
+  if (!st.next) lines.push(`${T[st.language].complete}. Para llevarlo al código: ${handoff()}`);
+  return lines.join("\n");
+}
+
+/** Si design.md perdió su estructura, el motivo para que el agente lo corrija; si no, null. */
+function guardReason() {
+  const st = load();
+  if (!st || !st.errors.length) return null;
+  return `design.md perdió su estructura: ${st.errors.join("; ")}. Restaura las marcas <!-- section:… --> (una por sección, en orden) sin tocar el contenido de la persona.`;
+}
+
 function main() {
   const action = process.argv[2] || "report";
   const arg = (name) => {
@@ -249,15 +297,8 @@ function main() {
     // decision:"block" el motivo le llega a Claude, que la corrige en el siguiente paso.
     const file = (readStdin().tool_input || {}).file_path || "";
     if (path.resolve(ROOT, file) !== DESIGN) return;
-    const st = load();
-    if (st && st.errors.length) {
-      process.stdout.write(
-        JSON.stringify({
-          decision: "block",
-          reason: `design.md perdió su estructura: ${st.errors.join("; ")}. Restaura las marcas <!-- section:… --> (una por sección, en orden) sin tocar el contenido de la persona.`,
-        })
-      );
-    }
+    const reason = guardReason();
+    if (reason) process.stdout.write(JSON.stringify({ decision: "block", reason }));
     return;
   }
 
@@ -283,37 +324,13 @@ function main() {
 
   if (action === "hook") {
     if (readStdin().source === "compact") return; // ya está en el contexto resumido
-    if (!st) {
-      console.log(`📐 ${T.es.none} Propón empezar con /design (o: node .claude/helpers/design-status.cjs init --title "…" --lang es|en).`);
-      return;
-    }
-    const t = T[st.language];
-    const hechas = st.sections.filter((s) => s.done && s.id !== "ai-review");
-    const lines = [`📐 design.md (${st.language}) — ${hechas.length}/${SECTIONS.length - 1}: ${hechas.map((s) => s.label).join(", ") || "—"}.`];
-    if (st.errors.length) lines.push(`⚠️ Estructura: ${st.errors.join("; ")}.`);
-    if (st.next) lines.push(`${t.next}: ${st.next.label} → /design ${st.next.id}`);
-    if (st.readyForReview) {
-      if (!st.hasDiagram) lines.push(`${t.diagram}: /design-diagram architecture`);
-      lines.push(`${t.review}: en otra terminal, claude --permission-mode plan, y ahí /design-review <foco>.`);
-    }
-    if (!st.next) lines.push(`${t.complete}. Para llevarlo al código: ${handoff()}`);
-    console.log(lines.join("\n"));
+    console.log(hookMessage(st));
     return;
   }
 
-  // informe legible
-  if (!st) {
-    console.log(`${T.es.none} Créalo con: node .claude/helpers/design-status.cjs init --title "…" --lang es|en`);
-    return;
-  }
-  console.log(`📐 ${st.title || "design.md"} (${st.language})`);
-  for (const s of st.sections) console.log(`  ${s.done ? "✅" : "⏳"} ${s.label}${s.diagrams && s.diagrams.length ? `  [diagramas: ${s.diagrams.join(", ")}]` : ""}`);
-  if (st.errors.length) console.log(`\n⚠️ Estructura: ${st.errors.join("; ")}`);
-  if (st.next) console.log(`\n${T[st.language].next}: ${st.next.label} (/design ${st.next.id})`);
-  if (st.readyForReview) console.log(`${T[st.language].review}: claude --permission-mode plan → /design-review <foco>`);
-  if (!st.next) console.log(`${T[st.language].complete}. Para llevarlo al código: ${handoff()}`);
+  console.log(report(st));
 }
 
 if (require.main === module) main();
 
-module.exports = { SECTIONS, PENDING, parse, render, lintMermaid };
+module.exports = { SECTIONS, PENDING, DESIGN, parse, render, lintMermaid, load, hookMessage, report, guardReason };
