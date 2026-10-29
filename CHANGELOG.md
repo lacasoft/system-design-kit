@@ -4,6 +4,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ## [No publicado]
 
+### Added
+- **Base para Pi Agent (`--pi`)**: primera parte del soporte para [Pi Agent](https://github.com/earendil-works/pi) ≥ 1.4.0. Es una capa aditiva: sin `--pi` el instalador hace exactamente lo de antes. Con `--pi`:
+  - `.pi/settings.json` carga las skills desde `.claude/skills`, sin copias. Si el archivo ya existe se fusiona, y si no es JSON válido no se toca.
+  - `.pi/extensions/system-design-kit.ts` expande los `@imports` de `CLAUDE.md`, que Pi lee pero no resuelve. Sin esto, el modelo vería la línea `@design.md` en lugar del documento. La expansión la hace `.claude/helpers/claude-imports.cjs` con las reglas de Claude Code (rutas relativas al archivo, hasta 5 saltos, sin ciclos, fuera del código) y nunca incluye archivos de entorno reales ni nada de `~/.ssh` o `~/.aws`.
+  - La barra de estado de Pi muestra `📐 design-kit` cuando la capa está activa.
+  - El manifiesto registra la capa, así que `--update` la recuerda.
+  - Al terminar, el instalador explica la confianza del proyecto, `PI_TELEMETRY=0` y por qué conviene instalar ripgrep y fd.
+- CI: job que prueba la capa dentro de Pi 1.4.0 real con su proveedor simulado, sin modelo ni API key.
+
+### Changed
+- Las skills nombran el documento como `./design.md` y aclaran que sus rutas son relativas a la raíz del proyecto. Pi le dice al modelo que las referencias de una skill son relativas a la carpeta de la skill, y un modelo más pequeño (qwen3 8B) buscaba `design.md` en `.claude/skills/design/`.
+
 ## [1.1.0] - 2026-10-26
 
 ### Added

@@ -8,8 +8,10 @@ argument-hint: "[qué estimar: qps | almacenamiento | ancho de banda | caché | 
 
 Haces cuentas de servilleta que sirven para **decidir**, no para impresionar. Cada número sale de una fórmula visible y de supuestos marcados; el resultado se redondea al orden de magnitud y se traduce en una implicación de diseño. Una estimación sin implicación no sirve.
 
+Las rutas de esta skill (`./design.md`, `.claude/…`, `diagrams/`) son relativas a la raíz del proyecto, donde está `CLAUDE.md`; no a la carpeta de la skill.
+
 ## Datos de entrada
-Tómalos de *Requisitos* y *Escala y supuestos* en `design.md`. Pregunta solo lo que falte, una cosa a la vez: usuarios activos al día, acciones por usuario al día (lecturas y escrituras), tamaño medio de cada objeto, retención, factor de pico, crecimiento esperado.
+Tómalos de *Requisitos* y *Escala y supuestos* en `./design.md`. Pregunta solo lo que falte, una cosa a la vez: usuarios activos al día, acciones por usuario al día (lecturas y escrituras), tamaño medio de cada objeto, retención, factor de pico, crecimiento esperado.
 
 ## Fórmulas
 

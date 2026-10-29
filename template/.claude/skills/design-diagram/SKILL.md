@@ -8,6 +8,8 @@ argument-hint: "[architecture | sequence <flujo> | data-model | check | html <di
 
 Dibujas lo que el documento **ya dice**, nada más. Un diagrama que muestra algo que el texto no menciona es una decisión tomada a escondidas. Usas Mermaid porque vive dentro de `design.md`, se versiona como texto y se ve en GitHub y en VS Code.
 
+Las rutas de esta skill (`./design.md`, `.claude/…`, `diagrams/`) son relativas a la raíz del proyecto, donde está `CLAUDE.md`; no a la carpeta de la skill.
+
 ## Qué diagrama y dónde va
 
 | Argumento | Tipo Mermaid | Sección | Bloque |

@@ -103,3 +103,69 @@ test("--dry-run no escribe nada", () => {
   assert.deepEqual(fs.readdirSync(dir), []);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+// ---- capa de Pi Agent (--pi) ----
+const manifiesto = (dir) => JSON.parse(leer(dir, ".claude/.design-kit-manifest.json"));
+
+test("sin --pi no crea .pi/ ni lo registra en el manifiesto", () => {
+  const dir = carpeta();
+  const out = instalar(dir);
+  assert.ok(!fs.existsSync(path.join(dir, ".pi")));
+  assert.equal(manifiesto(dir).pi, undefined);
+  assert.doesNotMatch(out, /Pi Agent/);
+  assert.doesNotMatch(leer(dir, ".gitignore"), /\.pi\.backup/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("--pi instala la extensión y .pi/settings.json con las skills de .claude/", () => {
+  const dir = carpeta();
+  const out = instalar(dir, ["--pi"]);
+  assert.ok(fs.existsSync(path.join(dir, ".pi/extensions/system-design-kit.ts")));
+  assert.ok(fs.existsSync(path.join(dir, ".claude/helpers/claude-imports.cjs")), "la extensión usa el helper de .claude/");
+  assert.deepEqual(JSON.parse(leer(dir, ".pi/settings.json")), { skills: ["../.claude/skills"] });
+  assert.ok(manifiesto(dir).pi.files["extensions/system-design-kit.ts"]);
+  assert.match(out, /PI_TELEMETRY=0/);
+  assert.match(leer(dir, ".gitignore"), /^\.pi\.backup\.\*$/m);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("--update recuerda --pi y respeta la extensión editada", () => {
+  const dir = carpeta();
+  instalar(dir, ["--pi"]);
+  fs.rmSync(path.join(dir, ".pi/settings.json"));
+  instalar(dir, ["--update"]);
+  assert.ok(fs.existsSync(path.join(dir, ".pi/settings.json")), "sin --pi, --update vuelve a asegurar la capa");
+  assert.ok(manifiesto(dir).pi);
+  const ext = path.join(dir, ".pi/extensions/system-design-kit.ts");
+  fs.appendFileSync(ext, "\n// mi ajuste\n");
+  instalar(dir, ["--update"]);
+  assert.match(fs.readFileSync(ext, "utf8"), /mi ajuste/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("--pi fusiona un .pi/settings.json existente sin duplicar las skills", () => {
+  const dir = carpeta();
+  fs.mkdirSync(path.join(dir, ".pi"));
+  fs.writeFileSync(path.join(dir, ".pi/settings.json"), JSON.stringify({ theme: "dark", skills: ["../mis-skills"] }));
+  instalar(dir, ["--pi"]);
+  instalar(dir, ["--pi", "--update"]);
+  assert.deepEqual(JSON.parse(leer(dir, ".pi/settings.json")), { theme: "dark", skills: ["../mis-skills", "../.claude/skills"] });
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("--pi no toca un .pi/settings.json que no es un objeto JSON", () => {
+  const dir = carpeta();
+  fs.mkdirSync(path.join(dir, ".pi"));
+  fs.writeFileSync(path.join(dir, ".pi/settings.json"), "{ esto no es json");
+  const out = instalar(dir, ["--pi"]);
+  assert.equal(leer(dir, ".pi/settings.json"), "{ esto no es json");
+  assert.match(out, /no se toca/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("--dry-run --pi no escribe nada", () => {
+  const dir = carpeta();
+  instalar(dir, ["--dry-run", "--pi"]);
+  assert.deepEqual(fs.readdirSync(dir), []);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

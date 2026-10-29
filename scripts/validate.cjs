@@ -5,6 +5,7 @@
  *  - JSON válido (package.json, settings.json) y sintaxis de los .js/.cjs
  *  - La plantilla que genera el helper pasa su propio chequeo de estructura, en es y en en
  *  - Las skills que nombran secciones usan ids que existen
+ *  - La extensión de Pi carga helpers de .claude/ que existen
  *  - es-MX: sin peninsularismos en el contenido del kit
  *  - README: el número de skills que dice es el real
  */
@@ -74,8 +75,19 @@ for (const s of skills) {
   }
 }
 
+// La capa de Pi carga helpers de .claude/ por ruta relativa: cada uno tiene que existir.
+const PI = path.join(ROOT, "template", ".pi");
+for (const ext of walk(path.join(PI, "extensions"), (p) => p.endsWith(".ts"))) {
+  const refs = [...fs.readFileSync(ext, "utf8").matchAll(/\.\.\/\.\.\/\.claude\/helpers\/([\w.-]+)/g)].map((m) => m[1]);
+  if (!refs.length) errors.push(`${rel(ext)}: no carga ningún helper de .claude/`);
+  for (const h of refs) {
+    if (!fs.existsSync(path.join(T, "helpers", h))) errors.push(`${rel(ext)}: carga .claude/helpers/${h}, que no existe`);
+    else ok++;
+  }
+}
+
 const ESMX = /\b(coste|costes|montar|ordenador|ordenadores|fichero|ficheros|vale|pillar)\b/i;
-const contenido = [...walk(T, (p) => /\.(md|cjs)$/.test(p)), path.join(ROOT, "install.js"), path.join(ROOT, "README.md")];
+const contenido = [...walk(T, (p) => /\.(md|cjs)$/.test(p)), ...walk(PI, (p) => p.endsWith(".ts")), path.join(ROOT, "install.js"), path.join(ROOT, "README.md")];
 for (const f of contenido) {
   fs.readFileSync(f, "utf8").split("\n").forEach((l, i) => {
     const m = l.match(ESMX);
