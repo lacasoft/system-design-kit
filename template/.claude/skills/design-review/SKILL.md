@@ -1,6 +1,6 @@
 ---
 name: design-review
-description: Úsalo para revisar críticamente una parte acotada del diseño en design.md (un flujo, un componente o una sección) buscando escenarios de falla, cuellos de botella, problemas de consistencia, seguridad, costo u operación. Pensado para plan mode, después de tener requisitos, escala y arquitectura inicial.
+description: Úsalo para revisar críticamente una parte acotada del diseño en design.md (un flujo, un componente o una sección) buscando escenarios de falla, cuellos de botella, problemas de consistencia, seguridad, costo u operación. Pensado para un modo de solo lectura (plan mode en Claude Code, `pi --review` en Pi Agent), después de tener requisitos, escala y arquitectura inicial.
 argument-hint: "<foco> [máximo de hallazgos] [lente: fallas | escala | consistencia | seguridad | costo | operacion]"
 ---
 
@@ -13,7 +13,7 @@ Las rutas de esta skill (`./design.md`, `.claude/…`, `diagrams/`) son relativa
 ## Procedimiento
 1. **Foco.** Si no te lo dieron, pregunta cuál (sugiere 2-3 a partir de la arquitectura: "el flujo asíncrono de pedidos", "la caché de lectura", "la escritura de pagos").
 2. **Contexto.** Lee `./design.md` completo: requisitos, escala y fuera de alcance son el criterio. Revisa solo el foco.
-3. **Requisitos previos.** Corre `node .claude/helpers/design-status.cjs`. Si faltan requisitos, escala o arquitectura inicial, dilo: sin ellos la revisión es especulación. Sigue solo si la persona insiste, y marca qué supusiste.
+3. **Requisitos previos.** Corre `node .claude/helpers/design-status.cjs` (en `pi --review` no hay bash: usa la herramienta `design_status`). Si faltan requisitos, escala o arquitectura inicial, dilo: sin ellos la revisión es especulación. Sigue solo si la persona insiste, y marca qué supusiste.
 4. **Hallazgos.** Busca hasta **N** (por defecto 3) escenarios concretos, priorizados por impacto × probabilidad **a la escala declarada**. Un riesgo que solo aparece a 100× la escala del documento no entra, salvo que la persona pregunte por crecimiento.
 5. **Entrega** con el formato de abajo, en el idioma de la persona, y para.
 
@@ -38,8 +38,8 @@ Sin lente, usa la que mejor encaje con el foco (para un flujo asíncrono, **fall
 
 ## Reglas
 - **No rediseñes** ni propongas componentes nuevos si una mitigación local basta.
-- **No modifiques archivos.** En plan mode no puedes, y fuera de él tampoco lo hagas sin que te lo pidan.
-- **En plan mode la revisión es la respuesta**, no un plan de cambios. No prepares un plan para registrar ni aplicar nada si la persona no lo pidió: entrega los hallazgos y termina preguntando cuáles acepta. Solo cuando pida registrar o aplicar, eso sí es el plan que ella aprueba.
+- **No modifiques archivos.** En plan mode o en `pi --review` no puedes, y fuera de ellos tampoco lo hagas sin que te lo pidan.
+- **En plan mode o en `pi --review`, la revisión es la respuesta**, no un plan de cambios. No prepares un plan para registrar ni aplicar nada si la persona no lo pidió: entrega los hallazgos y termina preguntando cuáles acepta. Solo cuando pida registrar o aplicar, eso sí es el plan que ella aprueba.
 - Nada de consejos genéricos ("añade monitoreo") sin el escenario concreto que previenen.
 - Respeta *fuera de alcance*: no lo traigas de vuelta como hallazgo.
 - Si un requisito es ambiguo y cambia la conclusión, pregunta en lugar de suponer.

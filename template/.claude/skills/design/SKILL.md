@@ -46,5 +46,5 @@ Las rutas de esta skill (`./design.md`, `.claude/…`, `diagrams/`) son relativa
 ## Puntos de control
 - Con **requisitos, escala y arquitectura inicial** completos, dilo y sugiere dos cosas:
   1. `/design-diagram architecture` para tener el diagrama.
-  2. Revisar en **plan mode**: en la terminal integrada, `claude --permission-mode plan`, y ahí `/design-review <foco>` (por ejemplo, "el flujo asíncrono"). En plan mode Claude lee y propone sin editar; los cambios se aplican solo si la persona aprueba el plan.
+  2. Revisar en **plan mode**: en la terminal integrada, `claude --permission-mode plan`, y ahí `/design-review <foco>` (por ejemplo, "el flujo asíncrono"). En plan mode Claude lee y propone sin editar; los cambios se aplican solo si la persona aprueba el plan. En Pi Agent: `pi --review` y ahí `/skill:design-review <foco>`.
 - Si la persona se atasca, pregúntale qué le preocupa más del diseño y empieza por ahí.

@@ -78,14 +78,14 @@ flowchart LR
 
 ```bash
 mkdir acortador-urls && cd acortador-urls
-npx -y github:lacasoft/system-design-kit#v1.1.0
+npx -y github:lacasoft/system-design-kit#v1.2.0
 ```
 
 El instalador pregunta el idioma del documento (español o inglés) y qué vas a diseñar. Para
 instalar sin preguntas:
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.1.0 --lang en --title "URL shortener" --yes
+npx -y github:lacasoft/system-design-kit#v1.2.0 --lang en --title "URL shortener" --yes
 ```
 
 Después:
@@ -237,8 +237,12 @@ tu-carpeta/
     ├── design-kit.md               # reglas del taller: roles, idioma, modos de trabajo
     ├── settings.json               # hooks y línea de estado
     ├── helpers/design-status.cjs   # estado, verificación de estructura y lint de diagramas
+    ├── helpers/claude-imports.cjs  # expande los @imports de CLAUDE.md (lo usa la capa de Pi)
     └── skills/                     # design · estimate · design-diagram · design-review
 ```
+
+Con `--pi`, además `.pi/settings.json` y `.pi/extensions/system-design-kit.ts` (ver
+[También con Pi Agent](#también-con-pi-agent)).
 
 - Si ya tienes un `CLAUDE.md`, el kit añade su bloque sin tocar lo tuyo.
 - **`design.md` nunca se sobrescribe**, tampoco al actualizar.
@@ -306,10 +310,63 @@ lo que vino de aquí.
 
 ---
 
+## También con Pi Agent
+
+[Pi](https://github.com/earendil-works/pi) es un agente de código open source (MIT) que funciona
+con modelos de varios proveedores, también locales. Con `--pi`, el kit añade una capa para Pi que
+reutiliza las mismas skills y reglas: no hay una segunda copia que mantener.
+
+```bash
+npx -y github:lacasoft/system-design-kit#v1.2.0 --pi                    # carpeta nueva
+npx -y github:lacasoft/system-design-kit#v1.2.0 --update --pi --yes     # carpeta que ya usa el kit
+```
+
+**Requisitos:** Pi 1.4.0 o superior (paquete `@earendil-works/pi-coding-agent`, pide Node.js
+22.19+), ripgrep y fd instalados con el gestor de paquetes de tu sistema (si faltan, Pi descarga la
+última versión sin fijarla) y un modelo que use herramientas de forma confiable.
+
+| En Claude Code | En Pi |
+|---|---|
+| `/design`, `/estimate`, `/design-diagram` | `/skill:design`, `/skill:estimate`, `/skill:design-diagram` |
+| `claude --permission-mode plan` → `/design-review <foco>` | `pi --review` → `/skill:design-review <foco>` |
+| Hooks de inicio de sesión y de edición | La extensión del kit hace lo mismo |
+
+**Qué hace la capa.** Pi lee `CLAUDE.md`, pero no resuelve sus `@imports`, ni tiene los hooks ni el
+plan mode de Claude Code. La extensión del kit:
+- expande los imports, para que el modelo vea las reglas y `design.md`, no la línea `@design.md`;
+- pone el estado del documento en el contexto al iniciar y ofrece la herramienta de solo lectura
+  `design_status`;
+- tras cada escritura de `design.md`, incluida la que el modelo haga con un script, revisa que no
+  se haya perdido ninguna marca de sección;
+- con `pi --review` deja solo `read`, `grep`, `find`, `ls` y `design_status`, y bloquea cualquier
+  otra herramienta. Sin la extensión, `pi --review` no arranca (opción desconocida), así que nunca
+  abre una sesión con escritura por error.
+
+**Confianza del proyecto.** Pi solo carga `.pi/` si confías en la carpeta. Con la capa activa verás
+`📐 design-kit` abajo (`📐 design-kit · revisión` con `--review`); si no lo ves, la capa no está
+cargada.
+
+**Modelos probados** (escenario: dos turnos de `/skill:design`, tres repeticiones):
+
+| Modelo | Resultado |
+|---|---|
+| Claude Sonnet 5.5 (API de Anthropic) | ✅ Funciona: sigue la entrevista, escribe `design.md` sin romper la estructura y no inventa |
+| qwen3 8B (Ollama, local) | ⚠️ Con limitaciones: usa herramientas, pero no sigue el método de entrevista; en CPU tarda minutos por turno |
+| qwen2.5-coder 7B (Ollama, local) | ❌ No funciona: no llega a usar herramientas |
+
+Puedes usar cualquier otro modelo; la tabla solo dice cuáles probamos. Para usar modelos de Claude en
+Pi necesitas una API key de Anthropic (pago por uso): la suscripción de Claude es solo para Claude
+Code y las apps de Anthropic.
+
+**Privacidad.** Pi envía telemetría anónima de instalación por defecto; `PI_TELEMETRY=0` la apaga.
+El kit no añade ninguna.
+
+---
+
 ## Actualizar
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.1.0 --update --yes
+npx -y github:lacasoft/system-design-kit#v1.2.0 --update --yes
 ```
 
 Actualiza las reglas y skills que no hayas modificado. Lo que editaste se conserva y la versión
@@ -333,6 +390,9 @@ son tuyas.
 No. El kit son archivos locales y un script sin dependencias. Claude Code usa tu cuenta como en
 cualquier otro proyecto.
 
+**¿Funciona con otros agentes además de Claude Code?**
+Con [Pi Agent](#también-con-pi-agent), instalando con `--pi`. Las skills son las mismas.
+
 **¿Necesito VS Code?**
 No. Funciona en cualquier terminal; VS Code solo hace más cómoda la vista de los diagramas.
 
@@ -342,18 +402,19 @@ No. Funciona en cualquier terminal; VS Code solo hace más cómoda la vista de l
 
 ```bash
 npm run validate   # skills, JSON, sintaxis, estructura de la plantilla en es y en, español de México
-npm test           # helper e instalador (node:test, sin dependencias)
+npm test           # helpers e instalador (node:test, sin dependencias)
+PI_BIN=$(command -v pi) npm test   # además, la capa de Pi dentro de Pi real (modelo simulado, sin API key)
 ```
 
 ```text
 install.js                          # instalador (zero-dep)
 template/                           # lo que se instala en cada carpeta de diseño
 scripts/validate.cjs                # verificaciones de integridad (CI)
-test/                               # tests del helper y del instalador
+test/                               # tests de los helpers, del instalador y de la capa de Pi
 ```
 
 Versionado [SemVer](https://semver.org/) con un tag por versión; los cambios están en el
-[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.1.0`): es reproducible y evita la
+[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.2.0`): es reproducible y evita la
 caché de `npx`.
 
 ---
