@@ -82,7 +82,7 @@ const limpiar = (res) => fs.rmSync(res.dir, { recursive: true, force: true });
 
 test("con --pi, Pi carga las skills, expande CLAUDE.md y recibe el estado del diseño", { skip }, () => {
   const res = correrPi();
-  for (const s of ["design", "design-diagram", "design-review", "estimate"]) assert.match(res.prompt, new RegExp(`<name>${s}</name>`));
+  for (const s of ["design", "design-diagram", "design-review", "estimate", "task-planner"]) assert.match(res.prompt, new RegExp(`<name>${s}</name>`));
   assert.match(res.prompt, /# Taller de System Design/, "contenido de .claude/design-kit.md");
   assert.match(res.prompt, /<!-- section:requirements -->/, "contenido de design.md");
   assert.doesNotMatch(res.prompt, /^@(\.claude\/design-kit|design)\.md$/m, "no quedan líneas de import");

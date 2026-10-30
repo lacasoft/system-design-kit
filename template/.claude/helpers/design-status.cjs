@@ -9,6 +9,7 @@
  *   node design-status.cjs guard           PostToolUse: si una edición rompió la estructura, se lo dice a Claude
  *   node design-status.cjs statusline      línea de estado: "📐 3/8 · siguiente: …"
  *   node design-status.cjs lint            revisa los bloques Mermaid (tipo de diagrama, comillas y corchetes)
+ *   node design-status.cjs sprints         sprints de /task-planner: cuál está abierto, cuál sigue y el estado del backlog
  *   node design-status.cjs init --title "…" --lang es|en   crea design.md si no existe
  *
  * Cada sección lleva una marca `<!-- section:<id> -->` bajo su título. Las marcas, no los
@@ -20,6 +21,8 @@ const path = require("path");
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR || path.resolve(__dirname, "..", "..");
 const DESIGN = path.join(ROOT, "design.md");
+const BACKLOG = path.join(ROOT, "backlog.md");
+const SPRINTS = path.join(ROOT, "sprints");
 
 const SECTIONS = [
   {
@@ -265,6 +268,54 @@ function report(st, { pi } = {}) {
   if (st.next) lines.push(`\n${T[st.language].next}: ${st.next.label} (${x.skill("design")} ${st.next.id})`);
   if (st.readyForReview) lines.push(`${T[st.language].review}: ${x.review} → ${x.skill("design-review")} <foco>`);
   if (!st.next) lines.push(`${T[st.language].complete}. Para llevarlo al código: ${handoff()}`);
+  const sp = sprints();
+  if (sp.open.length) lines.push(`Sprint abierto: ${sp.open.map((o) => o.file).join(", ")} (${x.skill("task-planner")} cerrar)`);
+  return lines.join("\n");
+}
+
+// ---------- sprints de /task-planner ----------
+// Cada sprint vive en sprints/sprint-NN.md y se da por cerrado con `estado: cerrado` (o closed) en su
+// front matter o con su sección "## Cierre" / "## Close". El número siguiente lo da este helper,
+// no el modelo: así un plan nuevo nunca pisa uno anterior.
+function sprints() {
+  let files = [];
+  try {
+    files = fs.readdirSync(SPRINTS).filter((f) => /^sprint-\d+\.md$/.test(f));
+  } catch (_) {}
+  const list = files
+    .map((f) => {
+      const txt = fs.readFileSync(path.join(SPRINTS, f), "utf8");
+      const estado = (txt.match(/^(?:estado|status):\s*(\S+)/m) || [])[1] || "";
+      const closed = /^(cerrado|closed)$/i.test(estado) || /^## (Cierre|Close)\b/m.test(txt);
+      return { n: Number(f.match(/\d+/)[0]), file: `sprints/${f}`, closed };
+    })
+    .sort((a, b) => a.n - b.n);
+  const next = (list.length ? list[list.length - 1].n : 0) + 1;
+  // Estados del backlog: la columna "Estado" (o "Status") de la tabla de historias de backlog.md.
+  let backlog = null;
+  try {
+    const rows = fs.readFileSync(BACKLOG, "utf8").split("\n").filter((l) => /^\|/.test(l));
+    const header = rows.find((l) => /\|\s*(Estado|Status)\s*\|/i.test(l));
+    if (header) {
+      const col = header.split("|").findIndex((c) => /^\s*(Estado|Status)\s*$/i.test(c));
+      backlog = {};
+      for (const r of rows.filter((l) => /^\|\s*H-\d+/.test(l))) {
+        const v = (r.split("|")[col] || "").trim().toLowerCase().replace(/[`*_]/g, "").split(/[\s·(]/)[0] || "?";
+        backlog[v] = (backlog[v] || 0) + 1;
+      }
+    }
+  } catch (_) {}
+  return { list, open: list.filter((x) => !x.closed), next: `sprints/sprint-${String(next).padStart(2, "0")}.md`, backlog };
+}
+
+function sprintsReport(sp = sprints()) {
+  const lines = [];
+  if (!sp.list.length) lines.push("Sin sprints todavía.");
+  else lines.push(`Sprints: ${sp.list.map((x) => `${path.basename(x.file, ".md")} ${x.closed ? "cerrado" : "abierto"}`).join(" · ")}`);
+  if (sp.open.length) lines.push(`Abierto: ${sp.open.map((x) => x.file).join(", ")} → ciérralo (resultados y retrospectiva) antes de planificar el siguiente.`);
+  lines.push(`Siguiente plan: ${sp.next}`);
+  if (sp.backlog) lines.push(`Backlog: ${Object.entries(sp.backlog).map(([k, v]) => `${v} ${k}`).join(" · ") || "sin historias"}`);
+  else if (fs.existsSync(BACKLOG)) lines.push("Backlog: backlog.md no tiene la tabla de historias con columna Estado.");
   return lines.join("\n");
 }
 
@@ -322,6 +373,11 @@ function main() {
     return;
   }
 
+  if (action === "sprints") {
+    console.log(sprintsReport());
+    return;
+  }
+
   if (action === "hook") {
     if (readStdin().source === "compact") return; // ya está en el contexto resumido
     console.log(hookMessage(st));
@@ -333,4 +389,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { SECTIONS, PENDING, DESIGN, parse, render, lintMermaid, load, hookMessage, report, guardReason };
+module.exports = { SECTIONS, PENDING, DESIGN, parse, render, lintMermaid, load, hookMessage, report, guardReason, sprints, sprintsReport };

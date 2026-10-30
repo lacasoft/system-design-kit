@@ -78,14 +78,14 @@ flowchart LR
 
 ```bash
 mkdir acortador-urls && cd acortador-urls
-npx -y github:lacasoft/system-design-kit#v1.2.0
+npx -y github:lacasoft/system-design-kit#v1.3.0
 ```
 
 El instalador pregunta el idioma del documento (español o inglés) y qué vas a diseñar. Para
 instalar sin preguntas:
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.2.0 --lang en --title "URL shortener" --yes
+npx -y github:lacasoft/system-design-kit#v1.3.0 --lang en --title "URL shortener" --yes
 ```
 
 Después:
@@ -149,6 +149,43 @@ flowchart LR
   owner(("Dueño")) -- "consulta clics" --> postgres
 ```
 
+### Backlog y sprints (cuando haga falta)
+
+`/task-planner` hace de Product Owner. Convierte el diseño en historias de usuario que el equipo
+puede estimar y probar, y las deja en `backlog.md` con el origen de cada una en `design.md`:
+
+```markdown
+#### H-02 · Redirigir un enlace corto
+**Como** visitante, **quiero** abrir un enlace corto y llegar a su destino, **para** no copiar URLs largas.
+
+**Criterios de aceptación**
+- **Dado** un enlace activo, **cuando** lo abro, **entonces** me redirige con 301 en menos de 100 ms (p99).
+- **Dado** un enlace desactivado, **cuando** lo abro, **entonces** veo un 404 y no se registra el clic.
+- **Dado** que la cola de clics no responde, **cuando** abro un enlace activo, **entonces** la redirección funciona igual.
+
+**Origen:** design.md › Requisitos (CU2), Escenarios de falla (cola caída)
+```
+
+La prioridad (MoSCoW) la propone la skill y la decides tú. La estimación queda en blanco para el
+planning del equipo.
+
+El diseño vive mucho tiempo y nada se reescribe:
+- `backlog.md` es el **backlog vivo del producto**: cada historia aparece una vez, con su estado
+  (`pendiente`, `sprint N`, `hecha`, `revisar`, `descartada`) y un ID que nunca cambia.
+- Cada sprint queda en su propio archivo, `sprints/sprint-NN.md`, con el plan y, al terminar, su cierre.
+- Antes de planificar el siguiente, la skill **cierra el anterior**: qué se terminó, qué vuelve al
+  backlog y una retrospectiva corta. Los **aprendizajes** se acumulan en `backlog.md` y el siguiente
+  plan dice cuáles aplicó.
+- Si `design.md` creció, los requisitos nuevos se vuelven historias nuevas. Las historias cuyo
+  origen cambió quedan marcadas para `revisar`; no se borran.
+
+```text
+/task-planner MVP: crear y redirigir enlaces     # primer sprint
+/task-planner                                     # cierra el sprint abierto y planifica el siguiente
+/task-planner cerrar                              # solo el cierre y la retrospectiva
+/task-planner actualizar                          # trae al backlog lo nuevo del diseño
+```
+
 ---
 
 ## El documento: `design.md`
@@ -172,7 +209,7 @@ sin romper nada.
 
 ## Comandos
 
-El kit incluye 4 skills de Claude Code:
+El kit incluye 5 skills de Claude Code:
 
 | Comando | Qué hace | ¿Escribe en `design.md`? |
 |---|---|---|
@@ -181,6 +218,7 @@ El kit incluye 4 skills de Claude Code:
 | `/design-diagram [architecture \| sequence <flujo> \| data-model \| check]` | Diagramas Mermaid desde el texto, y verificación diagrama ↔ texto | Sí, entre sus marcas |
 | `/design-diagram html <diagrama>` | HTML interactivo para presentar, con la skill opcional archify | No; escribe en `diagrams/` |
 | `/design-review <foco> [N] [lente]` | Revisión acotada: N escenarios (3 por defecto) con mitigación mínima y tradeoff | No; registra solo si se lo pides |
+| `/task-planner [objetivo \| cerrar \| refinar H-07 \| actualizar]` | Como Product Owner: historias de usuario con criterios Dado/Cuando/Entonces en un backlog vivo, y cada sprint planificado, cerrado y con sus aprendizajes | No; escribe en `backlog.md` y `sprints/` |
 
 Lentes de revisión: `fallas`, `escala`, `consistencia`, `seguridad`, `costo` y `operacion`.
 
@@ -238,7 +276,7 @@ tu-carpeta/
     ├── settings.json               # hooks y línea de estado
     ├── helpers/design-status.cjs   # estado, verificación de estructura y lint de diagramas
     ├── helpers/claude-imports.cjs  # expande los @imports de CLAUDE.md (lo usa la capa de Pi)
-    └── skills/                     # design · estimate · design-diagram · design-review
+    └── skills/                     # design · estimate · design-diagram · design-review · task-planner
 ```
 
 Con `--pi`, además `.pi/settings.json` y `.pi/extensions/system-design-kit.ts` (ver
@@ -317,8 +355,8 @@ con modelos de varios proveedores, también locales. Con `--pi`, el kit añade u
 reutiliza las mismas skills y reglas: no hay una segunda copia que mantener.
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.2.0 --pi                    # carpeta nueva
-npx -y github:lacasoft/system-design-kit#v1.2.0 --update --pi --yes     # carpeta que ya usa el kit
+npx -y github:lacasoft/system-design-kit#v1.3.0 --pi                    # carpeta nueva
+npx -y github:lacasoft/system-design-kit#v1.3.0 --update --pi --yes     # carpeta que ya usa el kit
 ```
 
 **Requisitos:** Pi 1.4.0 o superior (paquete `@earendil-works/pi-coding-agent`, pide Node.js
@@ -327,7 +365,7 @@ npx -y github:lacasoft/system-design-kit#v1.2.0 --update --pi --yes     # carpet
 
 | En Claude Code | En Pi |
 |---|---|
-| `/design`, `/estimate`, `/design-diagram` | `/skill:design`, `/skill:estimate`, `/skill:design-diagram` |
+| `/design`, `/estimate`, `/design-diagram`, `/task-planner` | `/skill:design`, `/skill:estimate`, `/skill:design-diagram`, `/skill:task-planner` |
 | `claude --permission-mode plan` → `/design-review <foco>` | `pi --review` → `/skill:design-review <foco>` |
 | Hooks de inicio de sesión y de edición | La extensión del kit hace lo mismo |
 
@@ -366,7 +404,7 @@ El kit no añade ninguna.
 ## Actualizar
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.2.0 --update --yes
+npx -y github:lacasoft/system-design-kit#v1.3.0 --update --yes
 ```
 
 Actualiza las reglas y skills que no hayas modificado. Lo que editaste se conserva y la versión
@@ -414,7 +452,7 @@ test/                               # tests de los helpers, del instalador y de 
 ```
 
 Versionado [SemVer](https://semver.org/) con un tag por versión; los cambios están en el
-[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.2.0`): es reproducible y evita la
+[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.3.0`): es reproducible y evita la
 caché de `npx`.
 
 ---

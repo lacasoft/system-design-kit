@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * validate.cjs — integridad del kit sin dependencias (lo usan `npm run validate` y la CI).
- *  - Frontmatter de las skills (name + description, y name = nombre de la carpeta)
+ *  - Frontmatter de las skills (name + description, name = nombre de la carpeta y YAML válido)
  *  - JSON válido (package.json, settings.json) y sintaxis de los .js/.cjs
  *  - La plantilla que genera el helper pasa su propio chequeo de estructura, en es y en en
  *  - Las skills que nombran secciones usan ids que existen
@@ -38,6 +38,11 @@ for (const s of skills) {
     else if (name !== path.basename(path.dirname(s))) errors.push(`${rel(s)}: name "${name}" no coincide con su carpeta`);
     if (!/^description:\s*\S/m.test(fm)) errors.push(`${rel(s)}: falta description`);
     else ok++;
+    // Un valor YAML sin comillas no puede contener ": " ni empezar con comilla sin cerrarla: Pi
+    // descarta la skill entera si su frontmatter no es YAML válido (Claude es más tolerante).
+    for (const [, key, val] of fm.matchAll(/^([\w-]+):[ \t]*(.+)$/gm)) {
+      if (!/^["']/.test(val) && /:\s/.test(val)) errors.push(`${rel(s)}: ${key} lleva ": " sin comillas, y eso no es YAML válido (Pi no cargaría la skill)`);
+    }
   }
 }
 
