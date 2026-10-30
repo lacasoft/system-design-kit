@@ -23,12 +23,13 @@ Este workspace sirve para **diseñar un sistema antes de construirlo**. No se es
 | Calcular capacidad | `/estimate` | Estimaciones con la aritmética a la vista |
 | Dibujar | `/design-diagram [architecture \| sequence <flujo> \| data-model \| check]` | Diagramas Mermaid derivados del texto, dentro de `design.md` |
 | Revisar | `claude --permission-mode plan` y luego `/design-review <foco>` (en Pi: `pi --review` y `/skill:design-review <foco>`) | Lee y critica sin editar; los cambios se aplican solo si la persona aprueba el plan |
+| Planificar el trabajo (cuando haga falta) | `/task-planner [objetivo \| cerrar \| refinar H-07 \| actualizar]` | Como Product Owner: historias de usuario ("Como…, quiero…, para…") con criterios Dado/Cuando/Entonces en el backlog vivo `backlog.md`, y cada sprint en `sprints/sprint-NN.md`, cerrando el anterior y aprendiendo de él; no toca `design.md` |
 | Presentar | `/design-diagram html <diagrama>` (requiere la skill opcional `archify`) | HTML interactivo en `diagrams/` a partir del Mermaid de `design.md` |
 | Pasar al código | En el proyecto de código con dev-starter-kit: `/project-context <ruta>/design.md` | Traslada el diseño a `CLAUDE.project.md` y crea un ADR por decisión |
 
 **Plan mode** (`claude --permission-mode plan`, o Shift+Tab dentro de una sesión) es el modo para revisar: Claude solo lee y propone. En Pi Agent el equivalente es `pi --review`, que deja solo herramientas de lectura. Úsalo cuando ya estén **requisitos, escala y arquitectura inicial**; sin ellos, una revisión es especulación.
 
-En **Pi Agent** las skills se invocan como `/skill:<nombre>`: `/skill:design`, `/skill:estimate`, `/skill:design-diagram`, `/skill:design-review`.
+En **Pi Agent** las skills se invocan como `/skill:<nombre>`: `/skill:design`, `/skill:estimate`, `/skill:design-diagram`, `/skill:design-review`, `/skill:task-planner`.
 
 ## Reglas de escritura en design.md
 - Viñetas cortas con las palabras de la persona; números con unidad; supuestos marcados.

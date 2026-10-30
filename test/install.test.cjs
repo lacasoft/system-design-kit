@@ -18,7 +18,7 @@ const leer = (dir, f) => fs.readFileSync(path.join(dir, f), "utf8");
 test("instala la capa, CLAUDE.md y design.md en español por defecto", () => {
   const dir = carpeta();
   instalar(dir, ["--title", "Acortador de URLs"]);
-  for (const f of [".claude/design-kit.md", ".claude/settings.json", ".claude/helpers/design-status.cjs", ".claude/skills/design/SKILL.md", ".claude/skills/design-review/SKILL.md", ".claude/skills/design-diagram/SKILL.md", ".claude/skills/estimate/SKILL.md"]) {
+  for (const f of [".claude/design-kit.md", ".claude/settings.json", ".claude/helpers/design-status.cjs", ".claude/skills/design/SKILL.md", ".claude/skills/design-review/SKILL.md", ".claude/skills/design-diagram/SKILL.md", ".claude/skills/estimate/SKILL.md", ".claude/skills/task-planner/SKILL.md"]) {
     assert.ok(fs.existsSync(path.join(dir, f)), f);
   }
   assert.match(leer(dir, "CLAUDE.md"), /@\.claude\/design-kit\.md\n@design\.md/);

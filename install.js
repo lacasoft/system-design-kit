@@ -275,13 +275,15 @@ async function main() {
    2. Con requisitos, escala y arquitectura inicial: /design-diagram architecture.
    3. Para revisar, en la terminal integrada: claude --permission-mode plan
       y ahí /design-review <foco>  (p. ej. ${es ? '"el flujo asíncrono"' : '"the async processing flow"'}).
+   4. Cuando toque planificar el trabajo con el equipo: /task-planner arma las historias de usuario
+      en backlog.md y cada sprint en sprints/, y al planificar el siguiente cierra y aprende del anterior.
    Vista previa de los diagramas en VS Code: extensión bierner.markdown-mermaid (GitHub los renderiza solo).`);
   if (withPi) {
     console.log(`
 🧩 Pi Agent (capa .pi/):
    • Abre pi en esta carpeta y acepta la confianza del proyecto: sin ella Pi no carga .pi/
      (ni las skills ni la expansión de CLAUDE.md). Con la capa activa verás "📐 design-kit" abajo.
-   • Las skills se invocan como /skill:design, /skill:estimate, /skill:design-diagram…
+   • Las skills se invocan como /skill:design, /skill:estimate, /skill:design-diagram, /skill:task-planner…
    • Para revisar, en otra terminal: pi --review (solo herramientas de lectura) y ahí
      /skill:design-review <foco>.
    • Pi envía telemetría anónima de instalación por defecto: PI_TELEMETRY=0 la apaga.
