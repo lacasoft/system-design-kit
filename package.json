@@ -1,8 +1,8 @@
 {
   "name": "@lacasoft/system-design-kit",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
-  "description": "Taller de System Design para Claude Code (y Pi Agent, opcional): entrevista guiada que construye design.md, estimaciones de capacidad, diagramas Mermaid y revisiones acotadas en modo de solo lectura.",
+  "description": "Taller de System Design para Claude Code (y Pi Agent, opcional): entrevista guiada que construye design.md, estimaciones de capacidad, diagramas Mermaid, revisiones acotadas en modo de solo lectura y el backlog del sprint con historias de usuario.",
   "bin": {
     "lacasoft-design": "install.js"
   },

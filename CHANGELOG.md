@@ -4,6 +4,27 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ## [No publicado]
 
+## [1.3.0] - 2026-10-30
+
+### Notas de actualización
+- `npx -y github:lacasoft/system-design-kit#v1.3.0 --update --yes` añade la skill. `design.md` no se toca.
+
+### Added
+- **`/task-planner`: backlog del producto y planificación de sprints, como lo haría un Product Owner.** Es opcional y no forma parte de la entrevista de `/design`: se usa cuando hay que planificar el trabajo y presentarlo al equipo, durante toda la vida del diseño.
+  - **Historias de usuario** (*Como [rol], quiero [acción], para [beneficio]*) con los roles de los actores del diseño, cortadas en vertical.
+  - Cada una con 2 a 5 criterios en **Dado / Cuando / Entonces** (camino principal, errores y escenarios de falla, no funcionales con su número), revisión INVEST, tareas técnicas, habilitadores y su **origen** en `design.md`. Lo que el diseño no dice va a *Preguntas abiertas*.
+  - Prioridad MoSCoW propuesta con su razón; la persona decide. **No estima:** la columna queda para el planning del equipo.
+  - **Varios sprints, sin reescribir nada:**
+    - `backlog.md` es el backlog vivo del producto: cada historia una vez, con estado e ID estable. Las historias se descartan con su porqué; nunca se borran.
+    - Cada sprint queda en `sprints/sprint-NN.md`, con su plan y su cierre. Un sprint cerrado ya no se edita.
+  - **Aprende de cada sprint:**
+    - Antes de planificar el siguiente, cierra el abierto: resultado de cada historia, objetivo cumplido, retrospectiva y huecos del diseño.
+    - Los aprendizajes accionables se acumulan en `backlog.md`, y el siguiente plan dice cuáles aplicó.
+    - Si el equipo estima, usa el ritmo observado como referencia.
+  - **Sigue al diseño:** los requisitos nuevos se vuelven historias nuevas, y las historias cuyo origen cambió o quedó tachado quedan en `revisar`.
+  - Argumentos: un objetivo (cierra y planifica), `cerrar`, `actualizar` o `refinar H-07`. Nunca modifica `design.md`.
+- **`design-status.cjs sprints`**: dice qué sprint está abierto, cuál es el siguiente archivo (lo numera el helper, no el modelo) y los estados del backlog. El informe de `design-status.cjs` avisa si hay un sprint abierto.
+
 ## [1.2.0] - 2026-10-29
 
 Soporte opcional para [Pi Agent](https://github.com/earendil-works/pi) ≥ 1.4.0. Para Claude Code no cambia nada.
