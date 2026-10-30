@@ -124,3 +124,45 @@ test("en Pi, el informe usa la misma sintaxis", () => {
   assert.match(out, /\(\/skill:design out-of-scope\)/);
   assert.match(out, /pi --review → \/skill:design-review/);
 });
+
+// ---- sprints de /task-planner ----
+function conSprints(files) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "design-sprints-"));
+  fs.writeFileSync(path.join(dir, "design.md"), render({ title: "X" }));
+  for (const [f, c] of Object.entries(files)) {
+    fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true });
+    fs.writeFileSync(path.join(dir, f), c);
+  }
+  const { PI_CODING_AGENT, ...base } = process.env;
+  const r = (action) => spawnSync("node", [HELPER, action], { encoding: "utf8", env: { ...base, CLAUDE_PROJECT_DIR: dir } }).stdout;
+  return { dir, r };
+}
+const BACKLOG = "| ID | Historia | Prioridad | Estado | Origen |\n|---|---|---|---|---|\n| H-01 | a | Must | hecha · sprint 1 | x |\n| H-02 | b | Must | sprint 2 | x |\n| H-03 | c | Should | pendiente | x |\n| H-04 | d | Could | pendiente | x |\n";
+
+test("sprints: sin sprints, el siguiente es el 01", () => {
+  const { dir, r } = conSprints({});
+  assert.match(r("sprints"), /Sin sprints todavía\.\nSiguiente plan: sprints\/sprint-01\.md/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("sprints: distingue cerrados de abiertos y numera el siguiente sin pisar ninguno", () => {
+  const { dir, r } = conSprints({
+    "sprints/sprint-01.md": "---\nsprint: 1\nestado: cerrado\n---\n# Sprint 1\n",
+    "sprints/sprint-02.md": "---\nsprint: 2\nestado: abierto\n---\n# Sprint 2\n## Plan\n",
+    "backlog.md": BACKLOG,
+  });
+  const out = r("sprints");
+  assert.match(out, /sprint-01 cerrado · sprint-02 abierto/);
+  assert.match(out, /Abierto: sprints\/sprint-02\.md → ciérralo/);
+  assert.match(out, /Siguiente plan: sprints\/sprint-03\.md/);
+  assert.match(out, /Backlog: 1 hecha · 1 sprint · 2 pendiente/);
+  assert.match(r("report"), /Sprint abierto: sprints\/sprint-02\.md \(\/task-planner cerrar\)/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("sprints: un sprint con su sección de cierre cuenta como cerrado aunque falte el estado", () => {
+  const { dir, r } = conSprints({ "sprints/sprint-01.md": "# Sprint 1\n## Plan\n## Cierre\n- hecho\n" });
+  assert.match(r("sprints"), /sprint-01 cerrado/);
+  assert.doesNotMatch(r("report"), /Sprint abierto/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
