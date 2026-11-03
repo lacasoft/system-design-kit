@@ -78,14 +78,14 @@ flowchart LR
 
 ```bash
 mkdir acortador-urls && cd acortador-urls
-npx -y github:lacasoft/system-design-kit#v1.4.0
+npx -y github:lacasoft/system-design-kit#v1.5.0
 ```
 
 El instalador pregunta el idioma del documento (español o inglés) y qué vas a diseñar. Para
 instalar sin preguntas:
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.4.0 --lang en --title "URL shortener" --yes
+npx -y github:lacasoft/system-design-kit#v1.5.0 --lang en --title "URL shortener" --yes
 ```
 
 Después:
@@ -195,7 +195,7 @@ El diseño vive mucho tiempo y nada se reescribe:
 | 1 | Requisitos | Casos de uso y requisitos no funcionales | Latencia, disponibilidad y consistencia tienen número |
 | 2 | Fuera de alcance | Lo que esta versión no hará, y por qué | Hay al menos dos exclusiones explícitas |
 | 3 | Escala y supuestos | Usuarios, lecturas/escrituras, tamaños, picos | Hay QPS, almacenamiento y ancho de banda calculados |
-| 4 | API y modelo de datos | Endpoints o eventos, entidades y claves de acceso | Los casos de uso principales tienen su API |
+| 4 | API y modelo de datos | Endpoints o eventos, entidades y claves de acceso; si hay varios dueños, quién es dueño de qué | Los casos de uso principales tienen su API, y ninguna entidad se escribe desde dos contextos |
 | 5 | Arquitectura inicial | Componentes con su responsabilidad, lo que les queda fuera y el estado del que son dueños, y el recorrido de una petición | Cada componente tiene responsabilidad, límite y dueño del estado, y el flujo principal está descrito de punta a punta |
 | 6 | Decisiones clave y tradeoffs | Qué se eligió, qué se descartó y por qué | Las tres decisiones que más pesan están justificadas |
 | 7 | Escenarios de falla | Los flujos críticos paso a paso: qué falla, qué efecto queda (hecho, pendiente o desconocido), quién recupera y cómo se comprueba | Cada flujo crítico tiene su tabla y hay tres o más escenarios con mitigación |
@@ -222,6 +222,7 @@ El kit incluye 5 skills de Claude Code:
 
 Lentes de revisión: `fallas`, `escala`, `consistencia`, `seguridad`, `costo`, `operacion` y `limites`.
 `limites` busca responsabilidades duplicadas o sin dueño, componentes que deciden y ejecutan a la vez, reglas de negocio fuera de su dueño y piezas sin un requisito que las pida.
+La entrevista y esa lente se apoyan en un **catálogo de componentes candidatos** (`.claude/skills/design/componentes.md`): cuándo hace falta cada pieza (API, caso de uso, coordinador, worker, adaptador, conciliación, supervisión, modelo de IA…) y cuándo sobra.
 
 También puedes escribir tus propias instrucciones en lenguaje natural, en español o en inglés. Por ejemplo:
 
@@ -335,12 +336,15 @@ claude --add-dir ../acortador-urls
 > /project-context ../acortador-urls/design.md
 ```
 
+En Pi Agent (dev-starter-kit 3.4 o superior, instalado con `--pi`) no hace falta `--add-dir`:
+`/skill:project-context ../acortador-urls/design.md`.
+
 | Del diseño | Al proyecto |
 |---|---|
 | Requisitos y fuera de alcance | *Visión del producto* |
 | Requisitos no funcionales y escala | *Atributos de calidad* con sus umbrales |
 | API y modelo de datos | *Modelo / dominio* y contratos |
-| Arquitectura y escenarios de falla | *Arquitectura* (con "fallas previstas") y tests de regresión |
+| Arquitectura y escenarios de falla | *Arquitectura* (con "fallas previstas") y tests de regresión. Desde dev-starter-kit 3.5, la ficha de responsabilidades como límites que el código respeta y los flujos críticos como tests de recuperación |
 | Decisiones clave y tradeoffs | **Un ADR por decisión** en `docs/adr/` |
 | Supuestos sin confirmar | *Pendiente de confirmar* |
 
@@ -356,8 +360,8 @@ con modelos de varios proveedores, también locales. Con `--pi`, el kit añade u
 reutiliza las mismas skills y reglas: no hay una segunda copia que mantener.
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.4.0 --pi                    # carpeta nueva
-npx -y github:lacasoft/system-design-kit#v1.4.0 --update --pi --yes     # carpeta que ya usa el kit
+npx -y github:lacasoft/system-design-kit#v1.5.0 --pi                    # carpeta nueva
+npx -y github:lacasoft/system-design-kit#v1.5.0 --update --pi --yes     # carpeta que ya usa el kit
 ```
 
 **Requisitos:** Pi 1.4.0 o superior (paquete `@earendil-works/pi-coding-agent`, pide Node.js
@@ -405,7 +409,7 @@ El kit no añade ninguna.
 ## Actualizar
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.4.0 --update --yes
+npx -y github:lacasoft/system-design-kit#v1.5.0 --update --yes
 ```
 
 Actualiza las reglas y skills que no hayas modificado. Lo que editaste se conserva y la versión
@@ -453,7 +457,7 @@ test/                               # tests de los helpers, del instalador y de 
 ```
 
 Versionado [SemVer](https://semver.org/) con un tag por versión; los cambios están en el
-[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.4.0`): es reproducible y evita la
+[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.5.0`): es reproducible y evita la
 caché de `npx`.
 
 ---
