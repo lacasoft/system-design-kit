@@ -1,7 +1,7 @@
 ---
 name: design-review
 description: Úsalo para revisar críticamente una parte acotada del diseño en design.md (un flujo, un componente o una sección) buscando escenarios de falla, cuellos de botella, problemas de consistencia, seguridad, costo u operación. Pensado para un modo de solo lectura (plan mode en Claude Code, `pi --review` en Pi Agent), después de tener requisitos, escala y arquitectura inicial.
-argument-hint: "<foco> [máximo de hallazgos] [lente: fallas | escala | consistencia | seguridad | costo | operacion]"
+argument-hint: "<foco> [máximo de hallazgos] [lente: fallas | escala | consistencia | seguridad | costo | operacion | limites]"
 ---
 
 # /design-review — revisión acotada del diseño
@@ -27,14 +27,15 @@ Las rutas de esta skill (`./design.md`, `.claude/…`, `diagrams/`) son relativa
 Cierra con una línea: cuál atacar primero y por qué.
 
 ## Lentes (qué buscar)
-- **fallas**: dependencia caída o lenta, reintentos sin backoff, timeouts encadenados, mensajes duplicados o perdidos, cola envenenada, procesos a medias sin compensación.
+- **fallas**: dependencia caída o lenta, reintentos sin backoff, timeouts encadenados, mensajes duplicados o perdidos, cola envenenada, procesos a medias sin compensación, resultado incierto tras un timeout que se reintenta sin comprobar si ya ocurrió, aprobación sobre información vieja, caso sin responsable ni plazo, trabajo pendiente que se pierde o se duplica tras un reinicio.
 - **escala**: partición caliente, fan-out, N+1, límites de conexiones, una pieza que no escala horizontalmente, caché fría tras un despliegue.
 - **consistencia**: doble escritura sin outbox, orden de eventos, lectura tras escritura, condiciones de carrera, idempotencia ausente.
 - **seguridad**: autorización por objeto, aislamiento entre tenants, abuso y rate limiting, datos sensibles en logs o colas.
 - **costo**: almacenamiento sin retención, egress entre regiones, sobreaprovisionamiento para picos raros.
 - **operacion**: despliegues sin vuelta atrás, migraciones de esquema, observabilidad del flujo, alertas accionables.
+- **limites**: responsabilidades duplicadas o sin dueño; un componente que decide, ejecuta y verifica a la vez; reglas de negocio en la API, en un adaptador o en un proceso programado; un componente técnico compartido que decide por varios dominios; estado con dos fuentes de verdad; límites artificiales (un servicio por tabla, un módulo por función); colas, workers o servicios sin un requisito que los pida; una salida de IA tratada como hecho confirmado. La mitigación mínima casi siempre es mover una regla a su dueño, o unir o separar dos piezas, no rediseñar.
 
-Sin lente, usa la que mejor encaje con el foco (para un flujo asíncrono, **fallas** y **consistencia**).
+Sin lente, usa la que mejor encaje con el foco (para un flujo asíncrono, **fallas** y **consistencia**; para la arquitectura completa o un componente, **limites**).
 
 ## Reglas
 - **No rediseñes** ni propongas componentes nuevos si una mitigación local basta.

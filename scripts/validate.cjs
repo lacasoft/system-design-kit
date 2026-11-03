@@ -7,7 +7,7 @@
  *  - Las skills que nombran secciones usan ids que existen
  *  - La extensión de Pi carga helpers de .claude/ que existen
  *  - es-MX: sin peninsularismos en el contenido del kit
- *  - README: el número de skills que dice es el real
+ *  - README: el número de skills que dice es el real, y las lentes de revisión son las de la skill
  */
 const fs = require("fs");
 const path = require("path");
@@ -101,6 +101,14 @@ for (const f of contenido) {
 }
 
 const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
+
+// Las lentes de /design-review que anuncia el README son las que define la skill.
+const review = fs.readFileSync(path.join(T, "skills", "design-review", "SKILL.md"), "utf8");
+const lentes = [...review.matchAll(/^- \*\*([a-z]+)\*\*:/gm)].map((m) => m[1]).sort();
+const lentesReadme = ((readme.match(/^Lentes de revisión: (.+)$/m) || [])[1] || "").match(/`([a-z]+)`/g) || [];
+const dichas = lentesReadme.map((x) => x.replace(/`/g, "")).sort();
+if (dichas.join("|") !== lentes.join("|")) errors.push(`README.md: lista las lentes [${dichas.join(", ")}] y design-review define [${lentes.join(", ")}]`);
+else ok++;
 const dicho = Number((readme.match(/(\d+)\s+skills/) || [])[1]);
 if (dicho !== skills.length) errors.push(`README.md: dice ${dicho} skills y hay ${skills.length}`);
 else ok++;
