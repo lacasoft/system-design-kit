@@ -49,6 +49,7 @@ Solo cuando el sistema tiene más de un dueño de reglas o de datos: áreas del 
 - Un contexto no es una tabla, una pantalla ni un servicio desplegado. Varios contextos pueden vivir en un solo despliegue, como módulos con límites claros.
 - Ninguna entidad se escribe desde dos contextos. Si otro necesita cambiarla, se lo pide a su dueño por un contrato.
 - En la ficha de *Arquitectura*, cada componente indica a qué contexto pertenece cuando hay varios.
+- Un límite escrito es una intención: carpetas, módulos o servicios separados no impiden que otro lo cruce. Si un límite es crítico (dinero, permisos, datos personales), anota en una línea cómo se protegerá: una regla de dependencias en el código (dev-starter-kit la escribe con `architecture-tests`), permisos por esquema en la base o un contrato entre servicios.
 
 ## Ficha de responsabilidades (en `architecture`)
 Una fila por componente, con los nombres de la persona:

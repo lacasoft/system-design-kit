@@ -78,14 +78,14 @@ flowchart LR
 
 ```bash
 mkdir acortador-urls && cd acortador-urls
-npx -y github:lacasoft/system-design-kit#v1.5.0
+npx -y github:lacasoft/system-design-kit#v1.6.0
 ```
 
 El instalador pregunta el idioma del documento (español o inglés) y qué vas a diseñar. Para
 instalar sin preguntas:
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.5.0 --lang en --title "URL shortener" --yes
+npx -y github:lacasoft/system-design-kit#v1.6.0 --lang en --title "URL shortener" --yes
 ```
 
 Después:
@@ -221,7 +221,7 @@ El kit incluye 5 skills de Claude Code:
 | `/task-planner [objetivo \| cerrar \| refinar H-07 \| actualizar]` | Como Product Owner: historias de usuario con criterios Dado/Cuando/Entonces en un backlog vivo, y cada sprint planificado, cerrado y con sus aprendizajes | No; escribe en `backlog.md` y `sprints/` |
 
 Lentes de revisión: `fallas`, `escala`, `consistencia`, `seguridad`, `costo`, `operacion` y `limites`.
-`limites` busca responsabilidades duplicadas o sin dueño, componentes que deciden y ejecutan a la vez, reglas de negocio fuera de su dueño y piezas sin un requisito que las pida.
+`limites` busca responsabilidades duplicadas o sin dueño, componentes que deciden y ejecutan a la vez, reglas de negocio fuera de su dueño, piezas sin un requisito que las pida y aislamientos que se dan por hechos sin decir cómo se protegen.
 La entrevista y esa lente se apoyan en un **catálogo de componentes candidatos** (`.claude/skills/design/componentes.md`): cuándo hace falta cada pieza (API, caso de uso, coordinador, worker, adaptador, conciliación, supervisión, modelo de IA…) y cuándo sobra.
 
 También puedes escribir tus propias instrucciones en lenguaje natural, en español o en inglés. Por ejemplo:
@@ -344,7 +344,7 @@ En Pi Agent (dev-starter-kit 3.4 o superior, instalado con `--pi`) no hace falta
 | Requisitos y fuera de alcance | *Visión del producto* |
 | Requisitos no funcionales y escala | *Atributos de calidad* con sus umbrales |
 | API y modelo de datos | *Modelo / dominio* y contratos |
-| Arquitectura y escenarios de falla | *Arquitectura* (con "fallas previstas") y tests de regresión. Desde dev-starter-kit 3.5, la ficha de responsabilidades como límites que el código respeta y los flujos críticos como tests de recuperación |
+| Arquitectura y escenarios de falla | *Arquitectura* (con "fallas previstas") y tests de regresión. Desde dev-starter-kit 3.5, la ficha de responsabilidades como límites que el código respeta y los flujos críticos como tests de recuperación. Desde 3.6, `architecture-tests` convierte esos límites en reglas del lint o de los tests que fallan si alguien los cruza |
 | Decisiones clave y tradeoffs | **Un ADR por decisión** en `docs/adr/` |
 | Supuestos sin confirmar | *Pendiente de confirmar* |
 
@@ -360,8 +360,8 @@ con modelos de varios proveedores, también locales. Con `--pi`, el kit añade u
 reutiliza las mismas skills y reglas: no hay una segunda copia que mantener.
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.5.0 --pi                    # carpeta nueva
-npx -y github:lacasoft/system-design-kit#v1.5.0 --update --pi --yes     # carpeta que ya usa el kit
+npx -y github:lacasoft/system-design-kit#v1.6.0 --pi                    # carpeta nueva
+npx -y github:lacasoft/system-design-kit#v1.6.0 --update --pi --yes     # carpeta que ya usa el kit
 ```
 
 **Requisitos:** Pi 1.4.0 o superior (paquete `@earendil-works/pi-coding-agent`, pide Node.js
@@ -409,7 +409,7 @@ El kit no añade ninguna.
 ## Actualizar
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.5.0 --update --yes
+npx -y github:lacasoft/system-design-kit#v1.6.0 --update --yes
 ```
 
 Actualiza las reglas y skills que no hayas modificado. Lo que editaste se conserva y la versión
@@ -457,7 +457,7 @@ test/                               # tests de los helpers, del instalador y de 
 ```
 
 Versionado [SemVer](https://semver.org/) con un tag por versión; los cambios están en el
-[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.5.0`): es reproducible y evita la
+[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.6.0`): es reproducible y evita la
 caché de `npx`.
 
 ---
