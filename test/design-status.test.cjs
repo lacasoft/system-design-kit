@@ -166,3 +166,12 @@ test("sprints: un sprint con su sección de cierre cuenta como cerrado aunque fa
   assert.doesNotMatch(r("report"), /Sprint abierto/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test("la plantilla pide la ficha de responsabilidades y los flujos críticos, en es y en en", () => {
+  const es = render({ title: "X", language: "es" });
+  assert.match(es, /<!-- section:architecture -->\n<!-- Ficha de responsabilidades: .*de qué estado es dueño/);
+  assert.match(es, /<!-- section:failures -->\n<!-- Flujos críticos paso a paso: .*\(hecho, pendiente o desconocido\)/);
+  const en = render({ title: "X", language: "en" });
+  assert.match(en, /<!-- section:architecture -->\n<!-- Responsibility sheet: .*which state it owns/);
+  assert.match(en, /<!-- section:failures -->\n<!-- Critical flows step by step: .*\(done, pending or unknown\)/);
+});

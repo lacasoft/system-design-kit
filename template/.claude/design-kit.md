@@ -31,6 +31,12 @@ Este workspace sirve para **diseñar un sistema antes de construirlo**. No se es
 
 En **Pi Agent** las skills se invocan como `/skill:<nombre>`: `/skill:design`, `/skill:estimate`, `/skill:design-diagram`, `/skill:design-review`, `/skill:task-planner`.
 
+## Responsabilidades y límites
+- En *Arquitectura*, cada componente lleva su responsabilidad, lo que le queda fuera y el estado del que es dueño. Un nombre en un diagrama no es una responsabilidad.
+- Las reglas de negocio viven en su dueño, no en la API, en un adaptador ni en un proceso programado.
+- Cuestiona la complejidad: cada cola, worker o servicio responde a un requisito. Un monolito con módulos bien delimitados es una respuesta válida; ninguna arquitectura se impone por costumbre.
+- En *Escenarios de falla*, distingue lo que falló de lo que **no se sabe** si ocurrió, y di quién lo comprueba antes de repetirlo.
+
 ## Reglas de escritura en design.md
 - Viñetas cortas con las palabras de la persona; números con unidad; supuestos marcados.
 - Al completar una sección, sustituye su línea `_⏳ Pendiente_` / `_⏳ Pending_`.

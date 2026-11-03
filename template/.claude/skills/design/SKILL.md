@@ -31,10 +31,48 @@ Las rutas de esta skill (`./design.md`, `.claude/…`, `diagrams/`) son relativa
 | `out-of-scope` | Qué no hará esta versión y por qué (funciones, plataformas, regiones, escalas). | Hay al menos dos puntos, o la persona confirma que no hay nada fuera. |
 | `scale` | Usuarios activos al día, acciones por usuario, ratio lectura:escritura, tamaño de los objetos, retención, factor de pico, crecimiento a 1-3 años. Calcula con la skill `estimate`. | Tabla de QPS medio y pico, almacenamiento y ancho de banda, con la aritmética y los supuestos marcados. |
 | `api-data-model` | Endpoints o eventos de cada caso de uso (método, recurso, campos mínimos, idempotencia, paginación, autenticación). Entidades, relaciones y **por qué clave se consulta** cada una. Almacenamiento elegido por patrón de acceso. | API de los casos de uso principales y entidades con su clave de acceso. |
-| `architecture` | Componentes y el recorrido de una petición de punta a punta, síncrono y asíncrono. Dónde vive el estado, qué se cachea, qué va por cola, réplicas y particiones. | El flujo principal está descrito y todos los componentes tienen nombre. Ofrece `/design-diagram architecture`. |
+| `architecture` | Componentes y el recorrido de una petición de punta a punta, síncrono y asíncrono. Por cada componente: **de qué es responsable, qué le queda fuera y de qué estado es dueño** (su fuente de verdad), y cómo se ejecuta. Qué se cachea, qué va por cola, réplicas y particiones. | La *ficha de responsabilidades* (abajo) tiene cada componente con responsabilidad, límite y dueño del estado, y ninguna regla de negocio vive en la API ni en un adaptador. El flujo principal está descrito. Ofrece `/design-diagram architecture`. |
 | `decisions` | Por cada decisión que condiciona el diseño: alternativa descartada, qué se gana, qué se paga, y el requisito que la motiva. | Al menos las tres decisiones que más condicionan el resto. |
-| `failures` | Qué pasa si cae cada dependencia crítica, ante un pico, mensajes duplicados o perdidos, o una partición de red. Cómo se detecta y cómo se mitiga. | Tres o más escenarios con detección y mitigación. |
+| `failures` | Los **flujos críticos** paso a paso (abajo): qué puede fallar, cómo se detecta, qué efecto queda, quién recupera y con qué evidencia se cierra. Además: dependencia caída o lenta, picos, mensajes duplicados, perdidos o fuera de orden, cambios concurrentes, resultado incierto tras un timeout, aprobación sobre información vieja, caso sin responsable o con plazo vencido, recuperación tras un reinicio, partición de red. | Cada flujo crítico tiene su tabla, ningún timeout se da por fallo sin decir cómo se comprueba, y hay tres o más escenarios con detección y mitigación. |
 | `ai-review` | No se rellena en la entrevista: es el registro de `/design-review`. | — |
+
+## Ficha de responsabilidades (en `architecture`)
+Una fila por componente, con los nombres de la persona:
+
+```markdown
+| Componente | Responsable de | No le toca | Estado (dueño · fuente de verdad) | Ejecución |
+|---|---|---|---|---|
+| API de pedidos | Recibir la solicitud, identificar al actor y responder | Decidir si el pedido es válido | — | síncrona |
+| Pedidos | Decidir si un pedido es válido y registrarlo | Cobrar | Pedido (PostgreSQL) | síncrona |
+```
+
+- **Ejecución:** síncrona, asíncrona, programada o manual.
+- La columna *No le toca* es la que más aclara: dice dónde termina un componente y quién sigue.
+- Si dos filas dicen lo mismo, sobra una. Si un componente decide, ejecuta y verifica a la vez, o si una regla de negocio vive en la API, en un adaptador o en un proceso programado, **señálalo y pregunta**; no impongas el cambio.
+- No todo sistema necesita colas, workers, planificadores ni coordinadores. Si la persona propone uno, pregunta qué requisito lo pide.
+- **Ficha profunda**, solo para los componentes de un flujo crítico o con efectos externos (pagos, envíos, integraciones), en viñetas bajo la tabla:
+  - entradas → salidas, con errores y efectos externos;
+  - límite transaccional y consistencia;
+  - duplicados, concurrencia, vencimientos y resultado desconocido;
+  - recuperación y escalamiento: quién, cuándo y con qué participación humana;
+  - señales para observarlo.
+
+## Flujos críticos (en `failures`)
+De 1 a 3 flujos: el caso de uso principal y los que mueven dinero o tienen efectos externos.
+
+```markdown
+### Flujo: <nombre>
+**Intención:** … · **Resultado esperado:** … · **Termina cuando:** …
+
+| Paso | Qué puede fallar | Cómo se detecta | Efecto | Quién recupera | Evidencia de cierre |
+|---|---|---|---|---|---|
+| 1. API → Pedidos | Doble envío | Misma clave de idempotencia | Ninguno adicional | Pedidos devuelve el mismo | Un solo pedido con esa clave |
+| 2. Pagos → proveedor | Timeout | Sin respuesta en 10 s | **Desconocido** | Pagos consulta el cobro antes de reintentar | Id del cobro en el proveedor |
+```
+
+- **Efecto:** `hecho`, `pendiente` o `desconocido`. Desconocido quiere decir que no se sabe si el efecto externo ocurrió: el diseño dice cómo se comprueba (consulta o conciliación) antes de repetirlo.
+- No confundas solicitado con ejecutado, enviado con entregado, propuesta con confirmación, ni interrumpir aquí con cancelar afuera. Las compensaciones dependen del dominio: no siempre hay rollback.
+- Ofrece `/design-diagram sequence <flujo>` para dibujarlo.
 
 ## Cómo escribir en design.md
 - Sustituye la línea `_⏳ Pendiente_` / `_⏳ Pending_` por el contenido. Conserva el título y la marca `<!-- section:… -->`.

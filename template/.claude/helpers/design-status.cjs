@@ -66,8 +66,8 @@ const SECTIONS = [
     es: "Arquitectura inicial",
     en: "Initial architecture",
     hint: {
-      es: "Componentes y el recorrido de una petición de punta a punta, síncrono y asíncrono. Dónde vive el estado.",
-      en: "Components and the end-to-end path of a request, sync and async. Where state lives.",
+      es: "Ficha de responsabilidades: por componente, de qué es responsable, qué le queda fuera, de qué estado es dueño y cómo se ejecuta. Y el recorrido de una petición de punta a punta, síncrono y asíncrono.",
+      en: "Responsibility sheet: for each component, what it is responsible for, what is outside its scope, which state it owns and how it runs. And the end-to-end path of a request, sync and async.",
     },
   },
   {
@@ -84,8 +84,8 @@ const SECTIONS = [
     es: "Escenarios de falla",
     en: "Failure scenarios",
     hint: {
-      es: "Qué pasa si cae cada dependencia crítica, ante picos, duplicados o particiones de red: cómo se detecta y cómo se mitiga.",
-      en: "What happens when each critical dependency fails, under spikes, duplicates or network partitions: detection and mitigation.",
+      es: "Flujos críticos paso a paso: qué falla, cómo se detecta, qué efecto queda (hecho, pendiente o desconocido), quién recupera y con qué evidencia se cierra. Y qué pasa si cae cada dependencia, ante picos, duplicados o particiones.",
+      en: "Critical flows step by step: what fails, how it is detected, what effect remains (done, pending or unknown), who recovers and what evidence closes it. And what happens when each dependency fails, under spikes, duplicates or partitions.",
     },
   },
   {

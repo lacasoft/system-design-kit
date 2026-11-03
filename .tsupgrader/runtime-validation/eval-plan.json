@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-11-03T20:38:07+01:00",
+  "generatedOnPlatform": "linux",
+  "projectType": "cli",
+  "setup": [
+    {
+      "command": "npm",
+      "args": ["ci"],
+      "timeoutSeconds": 600
+    }
+  ],
+  "assertions": [
+    {
+      "name": "cli-help-starts",
+      "kind": "process",
+      "command": "node",
+      "args": ["install.js", "--help"],
+      "verificationMethod": "exit-code",
+      "expected": "0",
+      "timeoutSeconds": 60
+    },
+    {
+      "name": "project-validation-passes",
+      "kind": "process",
+      "command": "npm",
+      "args": ["run", "validate"],
+      "verificationMethod": "exit-code",
+      "expected": "0",
+      "timeoutSeconds": 300
+    },
+    {
+      "name": "tests-pass",
+      "kind": "process",
+      "command": "npm",
+      "args": ["test"],
+      "verificationMethod": "test-results",
+      "expected": "0",
+      "timeoutSeconds": 300
+    }
+  ]
+}

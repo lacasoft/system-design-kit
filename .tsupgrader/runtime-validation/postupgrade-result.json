@@ -1,0 +1,108 @@
+{
+  "planHash": "3c4dcbaf0b3f0c0bad42ee4977ff73d72018c13fad33f1254b3626cbb92c4167",
+  "phase": "postupgrade",
+  "recordedAtUtc": "2026-11-03T20:14:15.7181496Z",
+  "retryCount": 0,
+  "resetBaseline": false,
+  "complete": true,
+  "result": {
+    "setupSucceeded": true,
+    "setupDurationMs": 297,
+    "setupFailureOutput": null,
+    "assertions": [
+      {
+        "name": "cli-help-starts",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "\nSystem Design Kit \u2014 instalador\n\nUso:  npx -y github:lacasoft/system-design-kit [opciones]   (dentro de la carpeta del dise\u00F1o)\n\n  --lang es|en     idioma de design.md (pregunta si no lo indicas; con --yes, es)\n  --title \u0022\u2026\u0022      qu\u00E9 vas a dise\u00F1ar (pregunta si no lo indicas; con --yes, el nombre de la carpeta)\n  --yes, -y        no interactivo\n  --pi             a\u00F1ade la capa para Pi Agent (.pi/): usa las mismas skills y expande los\n                   imports de CLAUDE.md. --update la recuerda.\n  --update         actualiza las reglas y skills del kit sin pisar lo que hayas editado.\n                   design.md nunca se toca.\n  --dry-run        simula sin escribir\n  --help, -h       esta ayuda\n\nDespu\u00E9s: abre Claude Code en la carpeta y corre /design.\n\n",
+        "durationMs": 40
+      },
+      {
+        "name": "project-validation-passes",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "\n\u003E @lacasoft/system-design-kit@1.3.0 validate\n\u003E node scripts/validate.cjs\n\n\n\uD83D\uDD0E Validaci\u00F3n del kit \u2014 skills: 5\n\u2705 Todo correcto (16 comprobaciones).\n",
+        "durationMs": 299
+      },
+      {
+        "name": "tests-pass",
+        "kind": "process",
+        "verificationMethod": "test-results",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "\n\u003E @lacasoft/system-design-kit@1.3.0 test\n\u003E node --test\n\n\u2714 una l\u00EDnea que solo es un import se sustituye por el archivo (2.791391ms)\n\u2714 un import dentro de una frase conserva la frase y pone el archivo debajo (0.652194ms)\n\u2714 la puntuaci\u00F3n final no forma parte de la ruta (4.369159ms)\n\u2714 la ruta es relativa al archivo que contiene el import (1.114343ms)\n\u2714 un ciclo no se expande dos veces (0.789351ms)\n\u2714 llega como m\u00E1ximo a 5 saltos (1.072357ms)\n\u2714 ignora los @ dentro de bloques y spans de c\u00F3digo (0.392598ms)\n\u2714 un import que no existe y los correos quedan como texto (0.438596ms)\n\u2714 nunca expande archivos de entorno reales ni ~/.ssh; los .example s\u00ED (0.966072ms)\n\u2714 un archivo importado dos veces entra una sola vez (0.612059ms)\n\u2714 sin imports devuelve el texto igual (idempotente) (0.471267ms)\n\u2714 como CLI imprime el CLAUDE.md expandido (43.340176ms)\n\u2714 la plantilla, en es y en, tiene las 8 secciones en orden y ninguna hecha (5.007246ms)\n\u2714 los t\u00EDtulos van en el idioma del documento (0.451504ms)\n\u2714 una secci\u00F3n con contenido cuenta como hecha y marca la siguiente (0.629272ms)\n\u2714 con requisitos, escala y arquitectura est\u00E1 lista para revisi\u00F3n (0.3874ms)\n\u2714 detecta marcas perdidas, duplicadas o fuera de orden (1.315169ms)\n\u2714 un t\u00EDtulo retocado no rompe nada: mandan las marcas (0.321803ms)\n\u2714 lint de Mermaid: acepta un diagrama v\u00E1lido y atrapa los errores t\u00EDpicos (0.899496ms)\n\u2714 hook: sin design.md propone /design (43.598496ms)\n\u2714 hook: dice la siguiente secci\u00F3n (39.19224ms)\n\u2714 hook: sugiere plan mode cuando est\u00E1 listo para revisi\u00F3n (45.717902ms)\n\u2714 hook: no repite tras una compactaci\u00F3n (29.364565ms)\n\u2714 guard: avisa a Claude si una edici\u00F3n rompi\u00F3 la estructura de design.md (36.035786ms)\n\u2714 guard: calla si la estructura est\u00E1 bien o si el archivo editado es otro (75.171128ms)\n\u2714 statusline muestra el avance (37.960153ms)\n\u2714 hook: con el dise\u00F1o completo da el comando para llevarlo al c\u00F3digo (36.693844ms)\n\u2714 hook: sin el dise\u00F1o completo no ofrece el traspaso (38.614373ms)\n\u2714 en Pi, el hook propone /skill:design y la revisi\u00F3n con pi --review (73.677185ms)\n\u2714 en Pi, el informe usa la misma sintaxis (39.49412ms)\n\u2714 sprints: sin sprints, el siguiente es el 01 (40.581642ms)\n\u2714 sprints: distingue cerrados de abiertos y numera el siguiente sin pisar ninguno (81.948895ms)\n\u2714 sprints: un sprint con su secci\u00F3n de cierre cuenta como cerrado aunque falte el estado (78.785944ms)\n\u2714 instala la capa, CLAUDE.md y design.md en espa\u00F1ol por defecto (63.141347ms)\n\u2714 --lang en genera el documento en ingl\u00E9s (42.80352ms)\n\u2714 --lang inv\u00E1lido sale con error sin instalar nada (41.168552ms)\n\u2714 sin TTY toma las respuestas de stdin (idioma y t\u00EDtulo) (48.203208ms)\n\u2714 --update nunca toca design.md y respeta lo que editaste (89.448619ms)\n\u2714 --update actualiza un archivo del kit intacto y deja .kit-new si ambos cambiaron (100.299621ms)\n\u2714 respeta un CLAUDE.md existente y a\u00F1ade su bloque una sola vez (102.291864ms)\n\u2714 --dry-run no escribe nada (50.356592ms)\n\u2714 sin --pi no crea .pi/ ni lo registra en el manifiesto (54.130923ms)\n\u2714 --pi instala la extensi\u00F3n y .pi/settings.json con las skills de .claude/ (47.104282ms)\n\u2714 --update recuerda --pi y respeta la extensi\u00F3n editada (148.360364ms)\n\u2714 --pi fusiona un .pi/settings.json existente sin duplicar las skills (94.024727ms)\n\u2714 --pi no toca un .pi/settings.json que no es un objeto JSON (42.905031ms)\n\u2714 --dry-run --pi no escribe nada (48.896748ms)\n\uFE63 con --pi, Pi carga las skills, expande CLAUDE.md y recibe el estado del dise\u00F1o (1.039097ms) # define PI_BIN con la ruta al binario de Pi para correr estas pruebas\n\uFE63 sin --pi, Pi ve las l\u00EDneas @ sin expandir y no carga las skills (0.211591ms) # define PI_BIN con la ruta al binario de Pi para correr estas pruebas\n\uFE63 pi --review deja solo herramientas de lectura y no se escribe nada (0.134128ms) # define PI_BIN con la ruta al binario de Pi para correr estas pruebas\n\uFE63 el guard avisa si una escritura de design.md rompe su estructura, tambi\u00E9n v\u00EDa bash (0.148284ms) # define PI_BIN con la ruta al binario de Pi para correr estas pruebas\n\u2139 tests 51\n\u2139 suites 0\n\u2139 pass 47\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 4\n\u2139 todo 0\n\u2139 duration_ms 1061.824865\n\u2026[truncated]",
+        "durationMs": 1222,
+        "testResults": {
+          "testFramework": "unknown",
+          "runnerDetectedFrom": "none",
+          "testsTotal": 0,
+          "testsPassed": 0,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "parseFailed": true
+        }
+      }
+    ],
+    "executions": [
+      {
+        "source": "setup[0]",
+        "resolvedExecutable": "/home/laca/.nvm/versions/node/v25.8.1/bin/npm",
+        "args": [
+          "ci"
+        ],
+        "cwd": "/mnt/reskt/code/lacasoft/starter-kit/system-design",
+        "env": {},
+        "prependPath": [],
+        "platform": "linux"
+      },
+      {
+        "source": "cli-help-starts",
+        "resolvedExecutable": "/home/laca/.nvm/versions/node/v25.8.1/bin/node",
+        "args": [
+          "install.js",
+          "--help"
+        ],
+        "cwd": "/mnt/reskt/code/lacasoft/starter-kit/system-design",
+        "env": {},
+        "prependPath": [],
+        "platform": "linux"
+      },
+      {
+        "source": "project-validation-passes",
+        "resolvedExecutable": "/home/laca/.nvm/versions/node/v25.8.1/bin/npm",
+        "args": [
+          "run",
+          "validate"
+        ],
+        "cwd": "/mnt/reskt/code/lacasoft/starter-kit/system-design",
+        "env": {},
+        "prependPath": [],
+        "platform": "linux"
+      },
+      {
+        "source": "tests-pass",
+        "resolvedExecutable": "/home/laca/.nvm/versions/node/v25.8.1/bin/npm",
+        "args": [
+          "test"
+        ],
+        "cwd": "/mnt/reskt/code/lacasoft/starter-kit/system-design",
+        "env": {},
+        "prependPath": [],
+        "platform": "linux"
+      }
+    ]
+  }
+}
