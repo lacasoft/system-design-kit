@@ -25,7 +25,7 @@ Este workspace sirve para **diseñar un sistema antes de construirlo**. No se es
 | Revisar | `claude --permission-mode plan` y luego `/design-review <foco>` (en Pi: `pi --review` y `/skill:design-review <foco>`) | Lee y critica sin editar; los cambios se aplican solo si la persona aprueba el plan |
 | Planificar el trabajo (cuando haga falta) | `/task-planner [objetivo \| cerrar \| refinar H-07 \| actualizar]` | Como Product Owner: historias de usuario ("Como…, quiero…, para…") con criterios Dado/Cuando/Entonces en el backlog vivo `backlog.md`, y cada sprint en `sprints/sprint-NN.md`, cerrando el anterior y aprendiendo de él; no toca `design.md` |
 | Presentar | `/design-diagram html <diagrama>` (requiere la skill opcional `archify`) | HTML interactivo en `diagrams/` a partir del Mermaid de `design.md` |
-| Pasar al código | En el proyecto de código con dev-starter-kit: `/project-context <ruta>/design.md` | Traslada el diseño a `CLAUDE.project.md` y crea un ADR por decisión |
+| Pasar al código | En el proyecto de código con dev-starter-kit: `/project-context <ruta>/design.md` (en Pi: `/skill:project-context <ruta>/design.md`) | Traslada el diseño a `CLAUDE.project.md` y crea un ADR por decisión |
 
 **Plan mode** (`claude --permission-mode plan`, o Shift+Tab dentro de una sesión) es el modo para revisar: Claude solo lee y propone. En Pi Agent el equivalente es `pi --review`, que deja solo herramientas de lectura. Úsalo cuando ya estén **requisitos, escala y arquitectura inicial**; sin ellos, una revisión es especulación.
 
@@ -34,7 +34,8 @@ En **Pi Agent** las skills se invocan como `/skill:<nombre>`: `/skill:design`, `
 ## Responsabilidades y límites
 - En *Arquitectura*, cada componente lleva su responsabilidad, lo que le queda fuera y el estado del que es dueño. Un nombre en un diagrama no es una responsabilidad.
 - Las reglas de negocio viven en su dueño, no en la API, en un adaptador ni en un proceso programado.
-- Cuestiona la complejidad: cada cola, worker o servicio responde a un requisito. Un monolito con módulos bien delimitados es una respuesta válida; ninguna arquitectura se impone por costumbre.
+- Cuestiona la complejidad: cada cola, worker o servicio responde a un requisito. Un monolito con módulos bien delimitados es una respuesta válida; ninguna arquitectura se impone por costumbre. El catálogo `.claude/skills/design/componentes.md` dice cuándo hace falta cada pieza.
+- Si hay más de un dueño de reglas o datos, *API y modelo de datos* dice quién es dueño de qué. Un contexto no es una tabla ni un servicio desplegado.
 - En *Escenarios de falla*, distingue lo que falló de lo que **no se sabe** si ocurrió, y di quién lo comprueba antes de repetirlo.
 
 ## Reglas de escritura en design.md

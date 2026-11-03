@@ -174,4 +174,28 @@ test("la plantilla pide la ficha de responsabilidades y los flujos críticos, en
   const en = render({ title: "X", language: "en" });
   assert.match(en, /<!-- section:architecture -->\n<!-- Responsibility sheet: .*which state it owns/);
   assert.match(en, /<!-- section:failures -->\n<!-- Critical flows step by step: .*\(done, pending or unknown\)/);
+  assert.match(es, /<!-- section:api-data-model -->\n<!-- .*Si hay varios dueños de reglas o datos, quién es dueño de qué/);
+  assert.match(en, /<!-- section:api-data-model -->\n<!-- .*If there are several owners of rules or data, who owns what/);
+});
+
+test("en Pi, el diseño completo se lleva al código con /skill:project-context, sin claude --add-dir", () => {
+  const todas = SECTIONS.map((s) => s.id).filter((id) => id !== "ai-review");
+  const completo = rellenar(render({ title: "X" }), todas);
+  for (const accion of ["hook", "report"]) {
+    const pi = correr(accion, completo, {}, enPi).out;
+    assert.match(pi, /abre pi ahí y corre \/skill:project-context .*design\.md/);
+    assert.doesNotMatch(pi, /claude --add-dir/);
+    assert.match(correr(accion, completo).out, /claude --add-dir .* y ahí \/project-context/, "en Claude no cambia");
+  }
+});
+
+test("en Pi, el diseño completo se lleva al código con /skill:project-context, sin claude --add-dir", () => {
+  const todas = SECTIONS.map((s) => s.id).filter((id) => id !== "ai-review");
+  const completo = rellenar(render({ title: "X" }), todas);
+  for (const accion of ["hook", "report"]) {
+    const pi = correr(accion, completo, {}, enPi).out;
+    assert.match(pi, /abre pi ahí y corre \/skill:project-context .*design\.md/);
+    assert.doesNotMatch(pi, /claude --add-dir/);
+    assert.match(correr(accion, completo).out, /claude --add-dir .* y ahí \/project-context/, "en Claude no cambia");
+  }
 });

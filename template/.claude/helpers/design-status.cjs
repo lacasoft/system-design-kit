@@ -57,8 +57,8 @@ const SECTIONS = [
     es: "API y modelo de datos",
     en: "API and data model",
     hint: {
-      es: "Endpoints o eventos de los casos de uso principales (idempotencia, paginación) y entidades con su clave de acceso.",
-      en: "Endpoints or events for the main use cases (idempotency, pagination) and entities with their access key.",
+      es: "Endpoints o eventos de los casos de uso principales (idempotencia, paginación) y entidades con su clave de acceso. Si hay varios dueños de reglas o datos, quién es dueño de qué.",
+      en: "Endpoints or events for the main use cases (idempotency, pagination) and entities with their access key. If there are several owners of rules or data, who owns what.",
     },
   },
   {
@@ -227,15 +227,19 @@ const T = {
   en: { none: "No design.md yet.", next: "Next", review: "Ready for review", diagram: "No diagram yet", complete: "Design complete" },
 };
 // Cuando no queda ninguna sección pendiente (salvo el registro de revisiones), el diseño puede
-// pasar al proyecto de código: dev-starter-kit (≥ 3.1) lo importa con /project-context.
-const handoff = () =>
-  `en el proyecto de código (con dev-starter-kit): claude --add-dir ${ROOT} y ahí /project-context ${DESIGN}`;
+// pasar al proyecto de código: dev-starter-kit (≥ 3.1; en Pi, ≥ 3.4 con --pi) lo importa con
+// /project-context. Claude Code necesita --add-dir para leer fuera del proyecto; Pi no.
+const handoff = (pi) =>
+  pi
+    ? `en el proyecto de código (con dev-starter-kit y --pi): abre pi ahí y corre /skill:project-context ${DESIGN}`
+    : `en el proyecto de código (con dev-starter-kit): claude --add-dir ${ROOT} y ahí /project-context ${DESIGN}`;
 
 // Las sugerencias usan la sintaxis del agente: en Pi las skills son /skill:<nombre> y el modo de
 // solo lectura es `pi --review`. Pi marca a sus procesos hijos con PI_CODING_AGENT=true.
 const enPi = () => process.env.PI_CODING_AGENT === "true";
 function syntax(pi = enPi()) {
   return {
+    pi,
     skill: (name) => (pi ? `/skill:${name}` : `/${name}`),
     review: pi ? "pi --review" : "claude --permission-mode plan",
   };
@@ -254,7 +258,7 @@ function hookMessage(st, { pi } = {}) {
     if (!st.hasDiagram) lines.push(`${t.diagram}: ${x.skill("design-diagram")} architecture`);
     lines.push(`${t.review}: en otra terminal, ${x.review}, y ahí ${x.skill("design-review")} <foco>.`);
   }
-  if (!st.next) lines.push(`${t.complete}. Para llevarlo al código: ${handoff()}`);
+  if (!st.next) lines.push(`${t.complete}. Para llevarlo al código: ${handoff(x.pi)}`);
   return lines.join("\n");
 }
 
@@ -267,7 +271,7 @@ function report(st, { pi } = {}) {
   if (st.errors.length) lines.push(`\n⚠️ Estructura: ${st.errors.join("; ")}`);
   if (st.next) lines.push(`\n${T[st.language].next}: ${st.next.label} (${x.skill("design")} ${st.next.id})`);
   if (st.readyForReview) lines.push(`${T[st.language].review}: ${x.review} → ${x.skill("design-review")} <foco>`);
-  if (!st.next) lines.push(`${T[st.language].complete}. Para llevarlo al código: ${handoff()}`);
+  if (!st.next) lines.push(`${T[st.language].complete}. Para llevarlo al código: ${handoff(x.pi)}`);
   const sp = sprints();
   if (sp.open.length) lines.push(`Sprint abierto: ${sp.open.map((o) => o.file).join(", ")} (${x.skill("task-planner")} cerrar)`);
   return lines.join("\n");

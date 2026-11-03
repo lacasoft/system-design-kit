@@ -4,6 +4,27 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ## [No publicado]
 
+## [1.5.0] - 2026-11-03
+
+### Notas de actualización
+- `npx -y github:lacasoft/system-design-kit#v1.5.0 --update --yes`. `design.md` no se toca y sigue siendo válido.
+
+### Added
+- **Catálogo de componentes candidatos** (`.claude/skills/design/componentes.md`).
+  - Cubre API, caso de uso, coordinador, gestor de trabajos, worker, planificador, reglas, aprobaciones, adaptador, verificación, conciliación, supervisión, repositorio, mensajería, observabilidad y modelo de IA.
+  - De cada pieza dice de qué es responsable, hasta dónde llega, cuándo hace falta y cuándo sobra o se combina con otra.
+  - Agrega señales de sobreingeniería y qué precisar cuando hay un modelo de IA: su salida es una sugerencia hasta que se confirma, y los documentos externos no amplían sus permisos.
+  - `/design` lo consulta cuando la persona duda o propone una pieza por costumbre, y la lente `limites` se apoya en él. La skill lo lee solo cuando hace falta, en Claude y en Pi.
+- **Contextos y propiedad en *API y modelo de datos*.** Solo cuando hay más de un dueño de reglas o de datos: una tabla con cada contexto, sus reglas, los datos de los que es dueño, sus contratos y lo que usa de otros.
+  - Ninguna entidad se escribe desde dos contextos.
+  - Un contexto no es una tabla ni un servicio desplegado; varios pueden vivir en un solo despliegue.
+  - La lente `limites` busca entidades escritas desde dos contextos.
+
+### Fixed
+- **En Pi, el aviso de diseño completo sugería `claude --add-dir`.** Ahora dice `/skill:project-context <ruta>/design.md`, tanto al iniciar la sesión como en el informe de `design-status.cjs`. En Claude no cambia.
+- **En Pi, el catálogo podía quedar sin leer:** una instrucción de leer un archivo auxiliar, escrita a media frase, se salta. La skill `design` ahora pide leer `componentes.md` con su ruta completa.
+- **WSL con Node de Windows:** el instalador fallaba con `EPERM` en `C:\Windows`, porque CMD no acepta la carpeta de WSL y se cambia ahí. Ahora lo detecta antes de escribir nada y explica qué hacer: instalar Node dentro de WSL y comprobar `command -v node npx`.
+
 ## [1.4.0] - 2026-11-03
 
 Diseños que dicen quién hace qué y dónde termina cada pieza, con fallas pensadas por flujo. Funciona igual en Claude Code y en Pi Agent.

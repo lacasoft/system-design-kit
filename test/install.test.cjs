@@ -18,7 +18,7 @@ const leer = (dir, f) => fs.readFileSync(path.join(dir, f), "utf8");
 test("instala la capa, CLAUDE.md y design.md en español por defecto", () => {
   const dir = carpeta();
   instalar(dir, ["--title", "Acortador de URLs"]);
-  for (const f of [".claude/design-kit.md", ".claude/settings.json", ".claude/helpers/design-status.cjs", ".claude/skills/design/SKILL.md", ".claude/skills/design-review/SKILL.md", ".claude/skills/design-diagram/SKILL.md", ".claude/skills/estimate/SKILL.md", ".claude/skills/task-planner/SKILL.md"]) {
+  for (const f of [".claude/design-kit.md", ".claude/settings.json", ".claude/helpers/design-status.cjs", ".claude/skills/design/SKILL.md", ".claude/skills/design-review/SKILL.md", ".claude/skills/design-diagram/SKILL.md", ".claude/skills/estimate/SKILL.md", ".claude/skills/task-planner/SKILL.md", ".claude/skills/design/componentes.md"]) {
     assert.ok(fs.existsSync(path.join(dir, f)), f);
   }
   assert.match(leer(dir, "CLAUDE.md"), /@\.claude\/design-kit\.md\n@design\.md/);
@@ -168,4 +168,16 @@ test("--dry-run --pi no escribe nada", () => {
   instalar(dir, ["--dry-run", "--pi"]);
   assert.deepEqual(fs.readdirSync(dir), []);
   fs.rmSync(dir, { recursive: true, force: true });
+});
+
+// ---- Node de Windows desde WSL ----
+test("detecta el Node de Windows corriendo desde WSL o en una carpeta del sistema", () => {
+  const { windowsSystemDir } = require(INSTALL);
+  const sys = { SystemRoot: "C:\\Windows" };
+  assert.equal(windowsSystemDir("win32", "C:\\Windows", sys), true, "CMD cayó a C:\\Windows");
+  assert.equal(windowsSystemDir("win32", "C:\\Windows\\System32", sys), true);
+  assert.equal(windowsSystemDir("win32", "C:\\Users\\ana\\x", { ...sys, INIT_CWD: "\\\\wsl.localhost\\Ubuntu\\home\\ana\\x" }), true, "npx se lanzó desde una carpeta de WSL");
+  assert.equal(windowsSystemDir("win32", "C:\\Users\\ana\\proyecto", sys), false, "Windows normal: sigue");
+  assert.equal(windowsSystemDir("win32", "C:\\WindowsApps\\x", sys), false, "no confunde carpetas con nombre parecido");
+  assert.equal(windowsSystemDir("linux", "/home/ana/x", {}), false);
 });
