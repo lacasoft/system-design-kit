@@ -78,14 +78,14 @@ flowchart LR
 
 ```bash
 mkdir acortador-urls && cd acortador-urls
-npx -y github:lacasoft/system-design-kit#v1.5.0
+npx -y github:lacasoft/system-design-kit#v1.6.0
 ```
 
 El instalador pregunta el idioma del documento (español o inglés) y qué vas a diseñar. Para
 instalar sin preguntas:
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.5.0 --lang en --title "URL shortener" --yes
+npx -y github:lacasoft/system-design-kit#v1.6.0 --lang en --title "URL shortener" --yes
 ```
 
 Después:
@@ -360,8 +360,8 @@ con modelos de varios proveedores, también locales. Con `--pi`, el kit añade u
 reutiliza las mismas skills y reglas: no hay una segunda copia que mantener.
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.5.0 --pi                    # carpeta nueva
-npx -y github:lacasoft/system-design-kit#v1.5.0 --update --pi --yes     # carpeta que ya usa el kit
+npx -y github:lacasoft/system-design-kit#v1.6.0 --pi                    # carpeta nueva
+npx -y github:lacasoft/system-design-kit#v1.6.0 --update --pi --yes     # carpeta que ya usa el kit
 ```
 
 **Requisitos:** Pi 1.4.0 o superior (paquete `@earendil-works/pi-coding-agent`, pide Node.js
@@ -409,7 +409,7 @@ El kit no añade ninguna.
 ## Actualizar
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.5.0 --update --yes
+npx -y github:lacasoft/system-design-kit#v1.6.0 --update --yes
 ```
 
 Actualiza las reglas y skills que no hayas modificado. Lo que editaste se conserva y la versión
@@ -457,7 +457,7 @@ test/                               # tests de los helpers, del instalador y de 
 ```
 
 Versionado [SemVer](https://semver.org/) con un tag por versión; los cambios están en el
-[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.5.0`): es reproducible y evita la
+[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.6.0`): es reproducible y evita la
 caché de `npx`.
 
 ---

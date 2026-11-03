@@ -4,6 +4,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ## [No publicado]
 
+## [1.6.0] - 2026-11-03
+
+### Notas de actualización
+- `npx -y github:lacasoft/system-design-kit#v1.6.0 --update --yes`. `design.md` no se toca y sigue siendo válido.
+
+### Added
+- **Un límite es una intención hasta que algo lo comprueba.** En *Contextos y propiedad*, `/design` pide, solo para los límites críticos (dinero, permisos, datos personales), una línea sobre cómo se protegerán: una regla de dependencias en el código, permisos por esquema en la base o un contrato entre servicios. Carpetas, módulos o servicios separados no impiden que otro cruce el límite.
+- **La lente `limites` busca aislamientos que se dan por hechos** porque cada parte tiene su carpeta, su módulo del framework o su servicio, sin decir cómo se protege el límite crítico.
+- Con dev-starter-kit 3.6, la skill `architecture-tests` convierte esos límites en reglas del lint o de los tests que fallan si alguien los cruza.
+
 ## [1.5.0] - 2026-11-03
 
 ### Notas de actualización
