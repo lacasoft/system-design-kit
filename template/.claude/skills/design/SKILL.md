@@ -63,7 +63,7 @@ Una fila por componente, con los nombres de la persona:
 - **Ejecución:** síncrona, asíncrona, programada o manual.
 - La columna *No le toca* es la que más aclara: dice dónde termina un componente y quién sigue.
 - Si dos filas dicen lo mismo, sobra una. Si un componente decide, ejecuta y verifica a la vez, o si una regla de negocio vive en la API, en un adaptador o en un proceso programado, **señálalo y pregunta**; no impongas el cambio.
-- No todo sistema necesita colas, workers, planificadores ni coordinadores. Si la persona propone uno, pregunta qué requisito lo pide. Si duda qué piezas necesita, o propone una por costumbre, consulta `componentes.md`, junto a este archivo: dice cuándo hace falta cada pieza y cuándo sobra, y qué precisar si hay un modelo de IA.
+- No todo sistema necesita colas, workers, planificadores ni coordinadores. Si la persona propone uno, pregunta qué requisito lo pide. Si duda qué piezas necesita, o propone una por costumbre, **lee `componentes.md`**, que está junto a este archivo (`.claude/skills/design/componentes.md`): dice cuándo hace falta cada pieza y cuándo sobra, y qué precisar si hay un modelo de IA.
 - **Ficha profunda**, solo para los componentes de un flujo crítico o con efectos externos (pagos, envíos, integraciones), en viñetas bajo la tabla:
   - entradas → salidas, con errores y efectos externos;
   - límite transaccional y consistencia;
