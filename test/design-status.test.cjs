@@ -175,3 +175,14 @@ test("la plantilla pide la ficha de responsabilidades y los flujos críticos, en
   assert.match(en, /<!-- section:architecture -->\n<!-- Responsibility sheet: .*which state it owns/);
   assert.match(en, /<!-- section:failures -->\n<!-- Critical flows step by step: .*\(done, pending or unknown\)/);
 });
+
+test("en Pi, el diseño completo se lleva al código con /skill:project-context, sin claude --add-dir", () => {
+  const todas = SECTIONS.map((s) => s.id).filter((id) => id !== "ai-review");
+  const completo = rellenar(render({ title: "X" }), todas);
+  for (const accion of ["hook", "report"]) {
+    const pi = correr(accion, completo, {}, enPi).out;
+    assert.match(pi, /abre pi ahí y corre \/skill:project-context .*design\.md/);
+    assert.doesNotMatch(pi, /claude --add-dir/);
+    assert.match(correr(accion, completo).out, /claude --add-dir .* y ahí \/project-context/, "en Claude no cambia");
+  }
+});
