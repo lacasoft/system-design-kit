@@ -22,6 +22,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ### Fixed
 - **En Pi, el aviso de diseño completo sugería `claude --add-dir`.** Ahora dice `/skill:project-context <ruta>/design.md`, tanto al iniciar la sesión como en el informe de `design-status.cjs`. En Claude no cambia.
+- **En Pi, el catálogo podía quedar sin leer:** una instrucción de leer un archivo auxiliar, escrita a media frase, se salta. La skill `design` ahora pide leer `componentes.md` con su ruta completa.
 - **WSL con Node de Windows:** el instalador fallaba con `EPERM` en `C:\Windows`, porque CMD no acepta la carpeta de WSL y se cambia ahí. Ahora lo detecta antes de escribir nada y explica qué hacer: instalar Node dentro de WSL y comprobar `command -v node npx`.
 
 ## [1.4.0] - 2026-11-03
