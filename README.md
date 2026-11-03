@@ -78,14 +78,14 @@ flowchart LR
 
 ```bash
 mkdir acortador-urls && cd acortador-urls
-npx -y github:lacasoft/system-design-kit#v1.3.0
+npx -y github:lacasoft/system-design-kit#v1.4.0
 ```
 
 El instalador pregunta el idioma del documento (español o inglés) y qué vas a diseñar. Para
 instalar sin preguntas:
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.3.0 --lang en --title "URL shortener" --yes
+npx -y github:lacasoft/system-design-kit#v1.4.0 --lang en --title "URL shortener" --yes
 ```
 
 Después:
@@ -196,9 +196,9 @@ El diseño vive mucho tiempo y nada se reescribe:
 | 2 | Fuera de alcance | Lo que esta versión no hará, y por qué | Hay al menos dos exclusiones explícitas |
 | 3 | Escala y supuestos | Usuarios, lecturas/escrituras, tamaños, picos | Hay QPS, almacenamiento y ancho de banda calculados |
 | 4 | API y modelo de datos | Endpoints o eventos, entidades y claves de acceso | Los casos de uso principales tienen su API |
-| 5 | Arquitectura inicial | Componentes y el recorrido de una petición | El flujo principal está descrito de punta a punta |
+| 5 | Arquitectura inicial | Componentes con su responsabilidad, lo que les queda fuera y el estado del que son dueños, y el recorrido de una petición | Cada componente tiene responsabilidad, límite y dueño del estado, y el flujo principal está descrito de punta a punta |
 | 6 | Decisiones clave y tradeoffs | Qué se eligió, qué se descartó y por qué | Las tres decisiones que más pesan están justificadas |
-| 7 | Escenarios de falla | Qué pasa cuando algo falla y cómo se mitiga | Hay tres o más escenarios con mitigación |
+| 7 | Escenarios de falla | Los flujos críticos paso a paso: qué falla, qué efecto queda (hecho, pendiente o desconocido), quién recupera y cómo se comprueba | Cada flujo crítico tiene su tabla y hay tres o más escenarios con mitigación |
 | 8 | Revisión con IA | Registro de revisiones y lo que decidiste | Se llena con `/design-review` |
 
 El documento puede estar en **español o inglés**. Cada sección lleva una marca invisible
@@ -220,7 +220,8 @@ El kit incluye 5 skills de Claude Code:
 | `/design-review <foco> [N] [lente]` | Revisión acotada: N escenarios (3 por defecto) con mitigación mínima y tradeoff | No; registra solo si se lo pides |
 | `/task-planner [objetivo \| cerrar \| refinar H-07 \| actualizar]` | Como Product Owner: historias de usuario con criterios Dado/Cuando/Entonces en un backlog vivo, y cada sprint planificado, cerrado y con sus aprendizajes | No; escribe en `backlog.md` y `sprints/` |
 
-Lentes de revisión: `fallas`, `escala`, `consistencia`, `seguridad`, `costo` y `operacion`.
+Lentes de revisión: `fallas`, `escala`, `consistencia`, `seguridad`, `costo`, `operacion` y `limites`.
+`limites` busca responsabilidades duplicadas o sin dueño, componentes que deciden y ejecutan a la vez, reglas de negocio fuera de su dueño y piezas sin un requisito que las pida.
 
 También puedes escribir tus propias instrucciones en lenguaje natural, en español o en inglés. Por ejemplo:
 
@@ -355,8 +356,8 @@ con modelos de varios proveedores, también locales. Con `--pi`, el kit añade u
 reutiliza las mismas skills y reglas: no hay una segunda copia que mantener.
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.3.0 --pi                    # carpeta nueva
-npx -y github:lacasoft/system-design-kit#v1.3.0 --update --pi --yes     # carpeta que ya usa el kit
+npx -y github:lacasoft/system-design-kit#v1.4.0 --pi                    # carpeta nueva
+npx -y github:lacasoft/system-design-kit#v1.4.0 --update --pi --yes     # carpeta que ya usa el kit
 ```
 
 **Requisitos:** Pi 1.4.0 o superior (paquete `@earendil-works/pi-coding-agent`, pide Node.js
@@ -404,7 +405,7 @@ El kit no añade ninguna.
 ## Actualizar
 
 ```bash
-npx -y github:lacasoft/system-design-kit#v1.3.0 --update --yes
+npx -y github:lacasoft/system-design-kit#v1.4.0 --update --yes
 ```
 
 Actualiza las reglas y skills que no hayas modificado. Lo que editaste se conserva y la versión
@@ -452,7 +453,7 @@ test/                               # tests de los helpers, del instalador y de 
 ```
 
 Versionado [SemVer](https://semver.org/) con un tag por versión; los cambios están en el
-[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.3.0`): es reproducible y evita la
+[CHANGELOG](CHANGELOG.md). Instala siempre fijando el tag (`#v1.4.0`): es reproducible y evita la
 caché de `npx`.
 
 ---

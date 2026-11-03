@@ -4,6 +4,36 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/) y [SemVer](htt
 
 ## [No publicado]
 
+## [1.4.0] - 2026-11-03
+
+Diseños que dicen quién hace qué y dónde termina cada pieza, con fallas pensadas por flujo. Funciona igual en Claude Code y en Pi Agent.
+
+### Notas de actualización
+- `npx -y github:lacasoft/system-design-kit#v1.4.0 --update --yes` trae las skills nuevas. `design.md` no se toca y sigue siendo válido: no hay secciones nuevas. Para sumar la ficha a un diseño existente, `/design architecture` amplía la sección sin reescribirla, y lo mismo `/design failures` con los flujos.
+- Los diseños nuevos traen en *Arquitectura* y *Escenarios de falla* la guía nueva de cada sección.
+
+### Added
+- **Ficha de responsabilidades en *Arquitectura*.**
+  - Por componente: de qué es responsable, qué le queda fuera, de qué estado es dueño (su fuente de verdad) y cómo se ejecuta (síncrono, asíncrono, programado o manual).
+  - La sección cuenta como completa cuando cada componente tiene responsabilidad, límite y dueño del estado, y ninguna regla de negocio vive en la API ni en un adaptador.
+  - Para los componentes de flujos críticos o con efectos externos, una ficha profunda: entradas y salidas, límite transaccional, duplicados y resultado desconocido, recuperación y observabilidad.
+- **Flujos críticos en *Escenarios de falla*.**
+  - De 1 a 3 flujos con su intención, el resultado esperado y cuándo terminan.
+  - Por paso: qué falla, cómo se detecta, qué efecto queda (**hecho, pendiente o desconocido**), quién recupera y con qué evidencia se cierra.
+  - Suma situaciones que antes no se preguntaban: resultado incierto tras un timeout, eventos fuera de orden, cambios concurrentes, aprobación sobre información vieja, caso sin responsable o con plazo vencido, y recuperación tras un reinicio.
+- **Lente `limites` en `/design-review`.** Busca:
+  - responsabilidades duplicadas o sin dueño;
+  - componentes que deciden, ejecutan y verifican a la vez;
+  - reglas de negocio en la API, en adaptadores o en procesos programados;
+  - estado con dos fuentes de verdad;
+  - límites artificiales;
+  - colas, workers o servicios sin un requisito que los pida;
+  - salidas de IA tratadas como hechos.
+
+  Su mitigación mínima es mover una regla a su dueño, o unir o separar dos piezas, sin rediseñar. La lente `fallas` incorpora las situaciones nuevas.
+- **Reglas del kit** (*Responsabilidades y límites*): cada pieza responde a un requisito, y un monolito con módulos bien delimitados es una respuesta válida.
+- `validate`: la lista de lentes del README tiene que coincidir con la de la skill.
+
 ## [1.3.0] - 2026-10-30
 
 ### Notas de actualización
