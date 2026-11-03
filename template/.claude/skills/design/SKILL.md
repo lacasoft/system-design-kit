@@ -30,11 +30,25 @@ Las rutas de esta skill (`./design.md`, `.claude/…`, `diagrams/`) son relativa
 | `requirements` | Actores y 3-5 casos de uso en verbos. No funcionales **con número**: latencia (p95/p99), disponibilidad (99.9 %…), consistencia (fuerte o eventual, y dónde), durabilidad, seguridad y privacidad, región. | Hay funcionales y al menos latencia, disponibilidad y consistencia cuantificadas. |
 | `out-of-scope` | Qué no hará esta versión y por qué (funciones, plataformas, regiones, escalas). | Hay al menos dos puntos, o la persona confirma que no hay nada fuera. |
 | `scale` | Usuarios activos al día, acciones por usuario, ratio lectura:escritura, tamaño de los objetos, retención, factor de pico, crecimiento a 1-3 años. Calcula con la skill `estimate`. | Tabla de QPS medio y pico, almacenamiento y ancho de banda, con la aritmética y los supuestos marcados. |
-| `api-data-model` | Endpoints o eventos de cada caso de uso (método, recurso, campos mínimos, idempotencia, paginación, autenticación). Entidades, relaciones y **por qué clave se consulta** cada una. Almacenamiento elegido por patrón de acceso. | API de los casos de uso principales y entidades con su clave de acceso. |
+| `api-data-model` | Endpoints o eventos de cada caso de uso (método, recurso, campos mínimos, idempotencia, paginación, autenticación). Entidades, relaciones y **por qué clave se consulta** cada una. Almacenamiento elegido por patrón de acceso. Si hay más de un dueño de reglas o datos, **quién es dueño de qué** (abajo). | API de los casos de uso principales y entidades con su clave de acceso. Si hay más de un dueño, la tabla de contextos, y ninguna entidad se escribe desde dos contextos. |
 | `architecture` | Componentes y el recorrido de una petición de punta a punta, síncrono y asíncrono. Por cada componente: **de qué es responsable, qué le queda fuera y de qué estado es dueño** (su fuente de verdad), y cómo se ejecuta. Qué se cachea, qué va por cola, réplicas y particiones. | La *ficha de responsabilidades* (abajo) tiene cada componente con responsabilidad, límite y dueño del estado, y ninguna regla de negocio vive en la API ni en un adaptador. El flujo principal está descrito. Ofrece `/design-diagram architecture`. |
 | `decisions` | Por cada decisión que condiciona el diseño: alternativa descartada, qué se gana, qué se paga, y el requisito que la motiva. | Al menos las tres decisiones que más condicionan el resto. |
 | `failures` | Los **flujos críticos** paso a paso (abajo): qué puede fallar, cómo se detecta, qué efecto queda, quién recupera y con qué evidencia se cierra. Además: dependencia caída o lenta, picos, mensajes duplicados, perdidos o fuera de orden, cambios concurrentes, resultado incierto tras un timeout, aprobación sobre información vieja, caso sin responsable o con plazo vencido, recuperación tras un reinicio, partición de red. | Cada flujo crítico tiene su tabla, ningún timeout se da por fallo sin decir cómo se comprueba, y hay tres o más escenarios con detección y mitigación. |
 | `ai-review` | No se rellena en la entrevista: es el registro de `/design-review`. | — |
+
+## Contextos y propiedad (en `api-data-model`, solo si hace falta)
+Solo cuando el sistema tiene más de un dueño de reglas o de datos: áreas del negocio con su propio lenguaje, equipos distintos o reglas que cambian por separado. Si hay un solo dueño, lo normal en sistemas pequeños, no hagas esta tabla.
+
+```markdown
+| Contexto | Reglas y lenguaje | Dueño de los datos | Contratos que expone | Usa de otros |
+|---|---|---|---|---|
+| Reservas | Disponibilidad, check-in, liberación | Reserva | POST /reservas · ReservaLiberada | Salas (consulta) |
+| Salas | Alta y baja de salas, capacidad | Sala | Consulta de salas activas | — |
+```
+
+- Un contexto no es una tabla, una pantalla ni un servicio desplegado. Varios contextos pueden vivir en un solo despliegue, como módulos con límites claros.
+- Ninguna entidad se escribe desde dos contextos. Si otro necesita cambiarla, se lo pide a su dueño por un contrato.
+- En la ficha de *Arquitectura*, cada componente indica a qué contexto pertenece cuando hay varios.
 
 ## Ficha de responsabilidades (en `architecture`)
 Una fila por componente, con los nombres de la persona:
@@ -49,7 +63,7 @@ Una fila por componente, con los nombres de la persona:
 - **Ejecución:** síncrona, asíncrona, programada o manual.
 - La columna *No le toca* es la que más aclara: dice dónde termina un componente y quién sigue.
 - Si dos filas dicen lo mismo, sobra una. Si un componente decide, ejecuta y verifica a la vez, o si una regla de negocio vive en la API, en un adaptador o en un proceso programado, **señálalo y pregunta**; no impongas el cambio.
-- No todo sistema necesita colas, workers, planificadores ni coordinadores. Si la persona propone uno, pregunta qué requisito lo pide.
+- No todo sistema necesita colas, workers, planificadores ni coordinadores. Si la persona propone uno, pregunta qué requisito lo pide. Si duda qué piezas necesita, o propone una por costumbre, consulta `componentes.md`, junto a este archivo: dice cuándo hace falta cada pieza y cuándo sobra, y qué precisar si hay un modelo de IA.
 - **Ficha profunda**, solo para los componentes de un flujo crítico o con efectos externos (pagos, envíos, integraciones), en viñetas bajo la tabla:
   - entradas → salidas, con errores y efectos externos;
   - límite transaccional y consistencia;

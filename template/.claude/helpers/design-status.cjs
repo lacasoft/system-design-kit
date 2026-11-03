@@ -57,8 +57,8 @@ const SECTIONS = [
     es: "API y modelo de datos",
     en: "API and data model",
     hint: {
-      es: "Endpoints o eventos de los casos de uso principales (idempotencia, paginación) y entidades con su clave de acceso.",
-      en: "Endpoints or events for the main use cases (idempotency, pagination) and entities with their access key.",
+      es: "Endpoints o eventos de los casos de uso principales (idempotencia, paginación) y entidades con su clave de acceso. Si hay varios dueños de reglas o datos, quién es dueño de qué.",
+      en: "Endpoints or events for the main use cases (idempotency, pagination) and entities with their access key. If there are several owners of rules or data, who owns what.",
     },
   },
   {
