@@ -35,7 +35,7 @@ En **Pi Agent** las skills se invocan como `/skill:<nombre>`: `/skill:design`, `
 - En *Arquitectura*, cada componente lleva su responsabilidad, lo que le queda fuera y el estado del que es dueño. Un nombre en un diagrama no es una responsabilidad.
 - Las reglas de negocio viven en su dueño, no en la API, en un adaptador ni en un proceso programado.
 - Cuestiona la complejidad: cada cola, worker o servicio responde a un requisito. Un monolito con módulos bien delimitados es una respuesta válida; ninguna arquitectura se impone por costumbre. El catálogo `.claude/skills/design/componentes.md` dice cuándo hace falta cada pieza.
-- Si hay más de un dueño de reglas o datos, *API y modelo de datos* dice quién es dueño de qué. Un contexto no es una tabla ni un servicio desplegado.
+- Si hay más de un dueño de reglas o datos, *API y modelo de datos* dice quién es dueño de qué. Un contexto no es una tabla ni un servicio desplegado. Un límite es una intención mientras nada lo compruebe: para los críticos, el diseño dice cómo se protegerán.
 - En *Escenarios de falla*, distingue lo que falló de lo que **no se sabe** si ocurrió, y di quién lo comprueba antes de repetirlo.
 
 ## Reglas de escritura en design.md
